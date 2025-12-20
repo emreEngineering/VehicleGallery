@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Rental Form', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-key"></i> <span th:text="${rental.id != null ? 'Edit Rental' : 'New Rental'}">Rental
+                    Form</span></h2>
+            <a href="/rentals" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <div class="form-card">
+            <form th:action="${rental.id != null ? '/rentals/' + rental.id : '/rentals'}" method="post"
+                th:object="${rental}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Customer *</label>
+                        <select class="form-select" th:field="*{customer}" required>
+                            <option value="">Select Customer</option>
+                            <option th:each="c : ${customers}" th:value="${c.id}"
+                                th:text="${c.firstName + ' ' + c.lastName}"
+                                th:selected="${rental.customer != null and rental.customer.id == c.id}">Customer
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Listing *</label>
+                        <select class="form-select" th:field="*{listing}" required>
+                            <option value="">Select Listing</option>
+                            <option th:each="l : ${listings}" th:value="${l.id}"
+                                th:text="${l.vehicle.brand + ' ' + l.vehicle.model + ' - $' + l.dailyRate + '/day'}"
+                                th:selected="${rental.listing != null and rental.listing.id == l.id}">Listing</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" th:field="*{startDate}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-control" th:field="*{endDate}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Total Cost ($)</label>
+                        <input type="number" step="0.01" class="form-control" th:field="*{totalCost}"
+                            placeholder="0.00">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" th:field="*{status}">
+                            <option value="ACTIVE">Active</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg"></i> Save</button>
+                    <a href="/rentals" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

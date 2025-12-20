@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Gallery Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: #1a1a2e;
+            --sidebar-bg: #16213e;
+            --accent: #e94560;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            padding: 0;
+            position: fixed;
+            width: 260px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-brand {
+            padding: 1.5rem;
+            background: var(--primary-gradient);
+            text-align: center;
+        }
+        
+        .sidebar-brand h4 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .sidebar-brand small {
+            opacity: 0.8;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary) !important;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-primary) !important;
+            background: rgba(233, 69, 96, 0.1);
+            border-left-color: var(--accent);
+        }
+        
+        .nav-link i {
+            font-size: 1.2rem;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .stat-icon.vehicles { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.customers { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.listings { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-icon.sales { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .stat-icon.rentals { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .stat-icon.revenue { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .data-table {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .data-table .table {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .data-table thead {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .data-table th, .data-table td {
+            padding: 1rem;
+            border-color: rgba(255,255,255,0.05);
+        }
+        
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: var(--accent);
+        }
+        
+        .badge-fuel { background: #ffc107; color: #000; }
+        .badge-electric { background: #198754; }
+        .badge-hybrid { background: #0dcaf0; color: #000; }
+        .badge-sale { background: var(--accent); }
+        .badge-rental { background: #6f42c1; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h4><i class="bi bi-car-front-fill"></i> VehicleGallery</h4>
+            <small>Management System</small>
+        </div>
+        <nav class="nav flex-column mt-3">
+            <a class="nav-link active" href="/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link" href="/vehicles"><i class="bi bi-car-front"></i> Vehicles</a>
+            <a class="nav-link" href="/customers"><i class="bi bi-people"></i> Customers</a>
+            <a class="nav-link" href="/listings"><i class="bi bi-megaphone"></i> Listings</a>
+            <a class="nav-link" href="/sales"><i class="bi bi-cash-stack"></i> Sales</a>
+            <a class="nav-link" href="/rentals"><i class="bi bi-key"></i> Rentals</a>
+            <a class="nav-link" href="/services"><i class="bi bi-wrench"></i> Services</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+            <span class="text-secondary" th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy')}">Date</span>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card">
+                    <div class="stat-icon vehicles"><i class="bi bi-car-front"></i></div>
+                    <div class="stat-value" th:text="${vehicleCount}">0</div>
+                    <div class="stat-label">Vehicles</div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card">
+                    <div class="stat-icon customers"><i class="bi bi-people"></i></div>
+                    <div class="stat-value" th:text="${customerCount}">0</div>
+                    <div class="stat-label">Customers</div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card">
+                    <div class="stat-icon listings"><i class="bi bi-megaphone"></i></div>
+                    <div class="stat-value" th:text="${listingCount}">0</div>
+                    <div class="stat-label">Listings</div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card">
+                    <div class="stat-icon sales"><i class="bi bi-cash-stack"></i></div>
+                    <div class="stat-value" th:text="${saleCount}">0</div>
+                    <div class="stat-label">Sales</div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card">
+                    <div class="stat-icon rentals"><i class="bi bi-key"></i></div>
+                    <div class="stat-value" th:text="${rentalCount}">0</div>
+                    <div class="stat-label">Rentals</div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card">
+                    <div class="stat-icon revenue"><i class="bi bi-currency-dollar"></i></div>
+                    <div class="stat-value" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')}">0</div>
+                    <div class="stat-label">Revenue ($)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Row -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <h5 class="section-title"><i class="bi bi-car-front"></i> Recent Vehicles</h5>
+                <div class="data-table">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Model</th>
+                                <th>Year</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="vehicle : ${recentVehicles}">
+                                <td th:text="${vehicle.brand}">-</td>
+                                <td th:text="${vehicle.model}">-</td>
+                                <td th:text="${vehicle.year}">-</td>
+                                <td>
+                                    <span class="badge badge-fuel" th:if="${vehicle.vehicleType == 'FUEL'}">Fuel</span>
+                                    <span class="badge badge-electric" th:if="${vehicle.vehicleType == 'ELECTRIC'}">Electric</span>
+                                    <span class="badge badge-hybrid" th:if="${vehicle.vehicleType == 'HYBRID'}">Hybrid</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(recentVehicles)}">
+                                <td colspan="4" class="text-center text-secondary">No vehicles yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h5 class="section-title"><i class="bi bi-megaphone"></i> Active Listings</h5>
+                <div class="data-table">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Vehicle</th>
+                                <th>Type</th>
+                                <th>Price/Rate</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="listing : ${recentListings}">
+                                <td th:text="${listing.vehicle?.brand + ' ' + listing.vehicle?.model}">-</td>
+                                <td>
+                                    <span class="badge badge-sale" th:if="${listing.listingType == 'SALE'}">Sale</span>
+                                    <span class="badge badge-rental" th:if="${listing.listingType == 'RENTAL'}">Rental</span>
+                                </td>
+                                <td>
+                                    <span th:if="${listing.listingType == 'SALE'}" th:text="'$' + ${listing.price}">-</span>
+                                    <span th:if="${listing.listingType == 'RENTAL'}" th:text="'$' + ${listing.dailyRate} + '/day'">-</span>
+                                </td>
+                                <td th:text="${listing.publishDate}">-</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(recentListings)}">
+                                <td colspan="4" class="text-center text-secondary">No listings yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

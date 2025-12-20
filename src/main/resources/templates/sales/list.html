@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Sales', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-cash-stack"></i> Sales</h2>
+            <a href="/sales/new" class="btn btn-accent"><i class="bi bi-plus-lg"></i> New Sale</a>
+        </div>
+
+        <div class="data-table">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sale : ${sales}">
+                        <td th:text="${sale.id}">-</td>
+                        <td th:text="${sale.customer?.firstName + ' ' + sale.customer?.lastName}">-</td>
+                        <td th:text="${sale.listing?.vehicle?.brand + ' ' + sale.listing?.vehicle?.model}">-</td>
+                        <td th:text="${sale.date}">-</td>
+                        <td th:text="'$' + ${sale.amount}">-</td>
+                        <td>
+                            <span class="badge bg-success" th:if="${sale.status == 'COMPLETED'}">Completed</span>
+                            <span class="badge bg-warning" th:if="${sale.status == 'PENDING'}">Pending</span>
+                            <span class="badge bg-danger" th:if="${sale.status == 'CANCELLED'}">Cancelled</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(sales)}">
+                        <td colspan="6" class="text-center text-secondary py-4">No sales recorded yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

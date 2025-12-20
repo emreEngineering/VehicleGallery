@@ -1,0 +1,222 @@
+DÖNEM PROJESİ ÖNERİSİ 
+Yunus Emre Karaman – No:230303037 
+Abdullah Said Sönmez – No:230303054 
+ 
+1. Proje Başlığı 
+Araç Galerisi Yönetim Sistemi 
+2. Proje Senaryosu 
+Bu proje, bir araç galerisine ait satış, kiralama, müşteri, personel ve araç takibini dijital 
+ortamda yürütmek amacıyla geliştirilmiştir. Sistem; müşterilerin araç satın alma veya 
+kiralama işlemlerini kaydeder, personellerin hazırladığı faturaları takip eder ve her araç 
+için bakım/servis kayıtlarını tutar. Elektrikli ve yakıtlı araçlar alt sınıflar olarak ayrı 
+yönetilmekte; her biri satış, kiralama ve servis süreçlerinde izlenebilir durumdadır. Bu 
+sistem, galerinin tüm operasyonlarını verimli şekilde izlemeyi ve raporlamayı sağlar. 
+3. Varlıklar 
+Personel, Müşteri, Galerici, BireyselMüşteri, KurumsalMüşteri, Adres, Araba, YakıtlıAraba, 
+ElektrikliAraba, ServisKaydı, Sigorta, İlan, Kiralıkİlan, Satılıkİlan, Kiralama, Satış, Ödeme, 
+Teklif 
+4. İlişkiler 
+İlişki / Kavram 
+Kardinalite 
+Açıklama 
+Personel → Müşteri / 
+Galerici 
+1:1 
+ISA — Bir personel ya 
+müşteri ya galerici olabilir. 
+Müşteri → BireyselMüşteri 
+/ KurumsalMüşteri 
+1:1 
+Disjoint — Bir müşteri ya 
+bireyseldir ya kurumsaldır. 
+Müşteri → Adres 
+1:N 
+Bir müşteri birden fazla 
+adrese sahip olabilir. 
+Galerici → İlan 
+1:N 
+Bir galerici birden fazla ilan 
+oluşturabilir. 
+Araba → ServisKaydı 
+1:N 
+Zayıf varlık 
+Araba → Sigorta 
+1:N 
+Her araç geçmişte birden 
+fazla sigorta kaydına sahip 
+olabilir. 
+Araba → İlan 
+1:N 
+Zayıf varlık 
+İlan → Kiralıkİlan / 
+Satılıkİlan 
+1:1 
+Dışlama— Bir ilan ya kiralık 
+ya satılıktır. 
+Kiralıkİlan → Kiralama 
+1:N 
+Bir kiralık ilan birçok 
+kiralama işlemine konu 
+olabilir. 
+
+Satılıkİlan → Satış 
+1:N 
+Bir satılık ilan geçmişte 
+birden fazla satış işlemine 
+konu olabilir. 
+Kiralama / Satış → Ödeme 
+1:N 
+Her ödeme ya kiralama ya 
+satışa aittir. 
+Müşteri ↔ İlan (Teklif) 
+M:N 
+Bağımsız ilişki varlığı 
+(Teklif). Her teklif kendi 
+teklif_id, tarih ve tutarına 
+sahiptir. 
+Araba → YakıtlıAraba / 
+ElektrikliAraba 
+1:1 
+Örtüşme vardır.Bir araba 
+hem yakıtlı hem elektrikli 
+olabilir. 
+5. Nitelikler 
+Varlık / Kavram 
+Anahtarlar (PK / 
+FK) 
+Nitelikler 
+Açıklama 
+Personel 
+personel_id (PK) 
+ad, soyad, unvan 
+Üst varlık 
+Müşteri 
+musteri_id (PK) 
+ad, soyad, tc_no, 
+telefon, e_posta 
+Personel’den ISA 
+Galerici 
+galerici_id (PK) 
+sirket_adi, vergi_no 
+Personel’den ISA 
+BireyselMüşteri 
+musteri_id (FK) 
+dogum_tarihi 
+ 
+KurumsalMüşteri 
+musteri_id (FK) 
+sirket_adi, vergi_no 
+ 
+Adres 
+adres_id (PK), 
+musteri_id (FK) 
+il, ilce, mahalle, 
+cadde, bina_no, 
+posta_kodu 
+Müşteri adres 
+ilişkisi 
+Araba 
+araba_id (PK) 
+marka, model, yil, 
+renk, plaka, km, 
+sasi_no 
+Temel araç bilgileri 
+YakıtlıAraba 
+araba_id (FK) 
+yakit_tipi 
+ 
+ElektrikliAraba 
+araba_id (FK) 
+batarya_kapasitesi, 
+menzil_km 
+ 
+ServisKaydı 
+servis_id (PK), 
+araba_id (FK) 
+tarih, aciklama, 
+ucret 
+Zayıf varlık 
+Sigorta 
+sigorta_id (PK), 
+araba_id (FK) 
+sigorta_turu, 
+baslangic_tarihi, 
+bitis_tarihi 
+Araç sigorta geçmişi 
+İlan 
+ilan_id (PK), 
+araba_id (FK), 
+galerici_id (FK) 
+yayin_tarihi, 
+aciklama 
+Zayıf varlık 
+Kiralıkİlan 
+ilan_id (FK) 
+gunluk_ucret, 
+min_sure, max_sure 
+ 
+Satılıkİlan 
+ilan_id (FK) 
+fiyat, takas_durumu 
+ 
+Kiralama 
+kiralama_id (PK), 
+musteri_id (FK), 
+kiralik_ilan_id (FK) 
+baslangic_tarihi, 
+bitis_tarihi, 
+toplam_ucret 
+Dışlama 
+Satış 
+satis_id (PK), 
+musteri_id (FK), 
+satilik_ilan_id (FK) 
+tarih, tutar 
+Dışlama 
+
+Ödeme 
+odeme_id (PK), 
+kiralama_id (FK, 
+ops), satis_id (FK, 
+ops) 
+tarih, tutar, 
+odeme_turu 
+ 
+Teklif 
+teklif_id (PK), 
+musteri_id (FK), 
+ilan_id (FK) 
+teklif_tutari, 
+teklif_tarihi 
+M:N bağımsız ilişki 
+varlığı 
+6. Varoluş Bağımlılığı 
+Müşteri ile teklif varlıkları arasında vardır. 
+Fatura ve İlan varlıkları, bağlı oldukları Satış/Kiralama veya Araba kayıtları olmadan var 
+olamaz. Bu nedenle zayıf varlıklardır. 
+7. ISA (Kalıtım) İlişkisi 
+- Personel → Müşteri / Galerici (Disjoint) 
+8. Dışlama (Exclusion) 
+Bir ilan ya Kiralıkİlan ya da Satılıkİlan olabilir, her iki alt sınıfta aynı anda yer alamaz. 
+9. Zayıf Varlık 
+İlan ve ServisKaydı zayıf varlıklardır; varlıkları kendilerine bağlı Araba veya Galerici 
+olmadan tanımlanamaz. 
+10. Ayrışma (Disjoint) 
+Disjoint yapısı Personel, Müşteri ve İlan varlıklarında görülmektedir. 
+11. Örtüşme (Overlapping) 
+Araba varlığı hem YakıtlıAraba hem ElektrikliAraba alt sınıflarında bulunabilir (örneğin 
+hibrit araçlar). 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+12. E-R (Chen) Diyagramı 
+ 
+ 
+ 

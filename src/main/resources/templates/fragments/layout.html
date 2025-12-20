@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' | Vehicle Gallery'">Vehicle Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: #1a1a2e;
+            --sidebar-bg: #16213e;
+            --accent: #e94560;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            padding: 0;
+            position: fixed;
+            width: 260px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            background: var(--primary-gradient);
+            text-align: center;
+        }
+
+        .sidebar-brand h4 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-brand small {
+            opacity: 0.8;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary) !important;
+            background: rgba(233, 69, 96, 0.1);
+            border-left-color: var(--accent);
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .data-table {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table .table {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .data-table thead {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .btn-accent:hover {
+            background: #d63653;
+            color: white;
+        }
+
+        .badge-fuel {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .badge-electric {
+            background: #198754;
+        }
+
+        .badge-hybrid {
+            background: #0dcaf0;
+            color: #000;
+        }
+
+        .badge-sale {
+            background: var(--accent);
+        }
+
+        .badge-rental {
+            background: #6f42c1;
+        }
+
+        .badge-individual {
+            background: #20c997;
+        }
+
+        .badge-corporate {
+            background: #6610f2;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h4><i class="bi bi-car-front-fill"></i> VehicleGallery</h4>
+            <small th:if="${isDealer}">Galeri Yönetimi</small>
+            <small th:unless="${isDealer}">Müşteri Paneli</small>
+        </div>
+        <nav class="nav flex-column mt-3">
+            <a class="nav-link" href="/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link" href="/vehicles"><i class="bi bi-car-front"></i> Araçlar</a>
+            <a class="nav-link" th:if="${isDealer}" href="/customers"><i class="bi bi-people"></i> Müşteriler</a>
+            <a class="nav-link" href="/listings"><i class="bi bi-megaphone"></i> İlanlar</a>
+            <a class="nav-link" href="/sales"><i class="bi bi-cash-stack"></i> Satışlar</a>
+            <a class="nav-link" href="/rentals"><i class="bi bi-key"></i> Kiralamalar</a>
+            <a class="nav-link" th:if="${isDealer}" href="/services"><i class="bi bi-wrench"></i> Servisler</a>
+        </nav>
+
+        <!-- User Info -->
+        <div class="sidebar-user mt-auto"
+            style="position: absolute; bottom: 0; width: 100%; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-secondary d-block" th:if="${isDealer}">Galerici</small>
+                    <small class="text-secondary d-block" th:unless="${isDealer}">Müşteri</small>
+                    <span class="text-light" th:if="${currentUser != null}"
+                        th:text="${currentUser.firstName + ' ' + currentUser.lastName}">Kullanıcı</span>
+                </div>
+                <a href="/logout" class="btn btn-sm btn-outline-danger" title="Çıkış">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <th:block th:replace="${content}" />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

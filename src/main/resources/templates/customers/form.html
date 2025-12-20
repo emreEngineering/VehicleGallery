@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Add Customer', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="mb-4">
+            <h2><i class="bi bi-people"></i> <span th:text="${customer.id != null ? 'Edit' : 'Add'}">Add</span> Customer
+            </h2>
+        </div>
+
+        <div class="form-card">
+            <form th:action="@{/customers}" th:object="${customer}" method="post">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" class="form-control" th:field="*{firstName}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" class="form-control" th:field="*{lastName}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">National ID</label>
+                        <input type="text" class="form-control" th:field="*{nationalId}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" th:field="*{email}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" th:field="*{phone}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Customer Type *</label>
+                        <select class="form-select" th:field="*{customerType}" required>
+                            <option value="">Select Type</option>
+                            <option value="INDIVIDUAL">Individual</option>
+                            <option value="CORPORATE">Corporate</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Birth Date (Individual)</label>
+                        <input type="text" class="form-control" th:field="*{birthDate}" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Company Name (Corporate)</label>
+                        <input type="text" class="form-control" th:field="*{companyName}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tax Number (Corporate)</label>
+                        <input type="text" class="form-control" th:field="*{taxNumber}">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg"></i> Save</button>
+                    <a href="/customers" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

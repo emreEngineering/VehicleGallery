@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Customers', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-people"></i> Customers</h2>
+            <a href="/customers/new" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Add Customer</a>
+        </div>
+
+        <div class="data-table">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="customer : ${customers}">
+                        <td th:text="${customer.id}">-</td>
+                        <td th:text="${customer.firstName + ' ' + customer.lastName}">-</td>
+                        <td th:text="${customer.email}">-</td>
+                        <td th:text="${customer.phone}">-</td>
+                        <td>
+                            <span class="badge badge-individual"
+                                th:if="${customer.customerType == 'INDIVIDUAL'}">Individual</span>
+                            <span class="badge badge-corporate"
+                                th:if="${customer.customerType == 'CORPORATE'}">Corporate</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/customers/edit/{id}(id=${customer.id})}"
+                                class="btn btn-sm btn-outline-light"><i class="bi bi-pencil"></i></a>
+                            <a th:href="@{/customers/delete/{id}(id=${customer.id})}"
+                                class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')"><i
+                                    class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(customers)}">
+                        <td colspan="6" class="text-center text-secondary py-4">No customers found. <a
+                                href="/customers/new">Add your first customer</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Araçlar', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-car-front"></i> Araçlar</h2>
+            <a th:if="${isDealer}" href="/vehicles/new" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Araç
+                Ekle</a>
+        </div>
+
+        <div class="data-table">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Marka</th>
+                        <th>Model</th>
+                        <th>Yıl</th>
+                        <th>Renk</th>
+                        <th>Plaka</th>
+                        <th>Tip</th>
+                        <th>Kilometre</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="vehicle : ${vehicles}">
+                        <td th:text="${vehicle.id}">-</td>
+                        <td th:text="${vehicle.brand}">-</td>
+                        <td th:text="${vehicle.model}">-</td>
+                        <td th:text="${vehicle.year}">-</td>
+                        <td th:text="${vehicle.color}">-</td>
+                        <td><code th:text="${vehicle.plateNumber}">-</code></td>
+                        <td>
+                            <span class="badge badge-fuel" th:if="${vehicle.vehicleType == 'FUEL'}">Benzin</span>
+                            <span class="badge badge-electric"
+                                th:if="${vehicle.vehicleType == 'ELECTRIC'}">Elektrik</span>
+                            <span class="badge badge-hybrid" th:if="${vehicle.vehicleType == 'HYBRID'}">Hibrit</span>
+                        </td>
+                        <td th:text="${vehicle.mileage + ' km'}">-</td>
+                        <td>
+                            <!-- Galerici Butonları -->
+                            <div th:if="${isDealer}">
+                                <a th:href="@{/vehicles/edit/{id}(id=${vehicle.id})}"
+                                    class="btn btn-sm btn-outline-light"><i class="bi bi-pencil"></i></a>
+                                <a th:href="@{/vehicles/delete/{id}(id=${vehicle.id})}"
+                                    class="btn btn-sm btn-outline-danger" onclick="return confirm('Emin misiniz?')"><i
+                                        class="bi bi-trash"></i></a>
+                            </div>
+                            <!-- Müşteri Butonları -->
+                            <div th:unless="${isDealer}">
+                                <a th:href="@{/listings?vehicleId={id}(id=${vehicle.id})}"
+                                    class="btn btn-sm btn-outline-success"><i class="bi bi-eye"></i> İlanı Gör</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(vehicles)}">
+                        <td colspan="9" class="text-center text-secondary py-4">
+                            <span th:if="${isDealer}">Araç bulunamadı. <a href="/vehicles/new">İlk aracınızı
+                                    ekleyin</a></span>
+                            <span th:unless="${isDealer}">Henüz araç bulunmuyor.</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

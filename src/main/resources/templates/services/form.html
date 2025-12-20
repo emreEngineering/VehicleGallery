@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Service Record Form', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-wrench"></i> <span
+                    th:text="${serviceRecord.id != null ? 'Edit Service Record' : 'New Service Record'}">Service
+                    Form</span></h2>
+            <a href="/services" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <div class="form-card">
+            <form th:action="${serviceRecord.id != null ? '/services/' + serviceRecord.id : '/services'}" method="post"
+                th:object="${serviceRecord}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Vehicle *</label>
+                        <select class="form-select" th:field="*{vehicle}" required>
+                            <option value="">Select Vehicle</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.id}"
+                                th:text="${v.brand + ' ' + v.model + ' (' + v.plateNumber + ')'}"
+                                th:selected="${serviceRecord.vehicle != null and serviceRecord.vehicle.id == v.id}">
+                                Vehicle</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" th:field="*{date}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Cost ($)</label>
+                        <input type="number" step="0.01" class="form-control" th:field="*{cost}" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" th:field="*{description}" rows="3"
+                        placeholder="Service details..."></textarea>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg"></i> Save</button>
+                    <a href="/services" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

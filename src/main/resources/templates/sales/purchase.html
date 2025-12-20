@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Satın Al', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="mb-4">
+            <a href="/listings" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Geri</a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-card">
+                    <h4 class="mb-4"><i class="bi bi-cart-plus text-success"></i> Satın Alma Onayı</h4>
+
+                    <div class="alert alert-info">
+                        <h5 th:text="${listing.vehicle?.brand + ' ' + listing.vehicle?.model}">Araç</h5>
+                        <p class="mb-1"><strong>Yıl:</strong> <span th:text="${listing.vehicle?.year}">-</span></p>
+                        <p class="mb-1"><strong>Renk:</strong> <span th:text="${listing.vehicle?.color}">-</span></p>
+                        <p class="mb-1"><strong>Kilometre:</strong> <span
+                                th:text="${listing.vehicle?.mileage + ' km'}">-</span></p>
+                        <hr>
+                        <h4 class="text-success mb-0" th:text="${listing.price + ' ₺'}">Fiyat</h4>
+                    </div>
+
+                    <form th:action="@{/sales/purchase}" method="post">
+                        <input type="hidden" name="listingId" th:value="${listing.id}">
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Bu işlem satın alma talebinizi oluşturacaktır. Galeri yetkilileri sizinle iletişime
+                            geçecektir.
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                                <i class="bi bi-check-lg"></i> Satın Alma Talebini Onayla
+                            </button>
+                            <a href="/listings" class="btn btn-outline-secondary btn-lg">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

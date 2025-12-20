@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Add Vehicle', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="mb-4">
+            <h2><i class="bi bi-car-front"></i> <span th:text="${vehicle.id != null ? 'Edit' : 'Add'}">Add</span>
+                Vehicle</h2>
+        </div>
+
+        <div class="form-card">
+            <form th:action="@{/vehicles}" th:object="${vehicle}" method="post">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Brand *</label>
+                        <input type="text" class="form-control" th:field="*{brand}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Model *</label>
+                        <input type="text" class="form-control" th:field="*{model}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Year</label>
+                        <input type="number" class="form-control" th:field="*{year}" min="1900" max="2030">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Color</label>
+                        <input type="text" class="form-control" th:field="*{color}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Plate Number</label>
+                        <input type="text" class="form-control" th:field="*{plateNumber}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mileage (km)</label>
+                        <input type="number" class="form-control" th:field="*{mileage}" min="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Chassis Number</label>
+                        <input type="text" class="form-control" th:field="*{chassisNumber}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Vehicle Type *</label>
+                        <select class="form-select" th:field="*{vehicleType}" required>
+                            <option value="">Select Type</option>
+                            <option value="FUEL">Fuel</option>
+                            <option value="ELECTRIC">Electric</option>
+                            <option value="HYBRID">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.1)">
+                        <h5>Fuel Vehicle Details</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fuel Type</label>
+                        <select class="form-select" th:field="*{fuelType}">
+                            <option value="">N/A</option>
+                            <option value="GASOLINE">Gasoline</option>
+                            <option value="DIESEL">Diesel</option>
+                            <option value="LPG">LPG</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.1)">
+                        <h5>Electric Vehicle Details</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Battery Capacity (kWh)</label>
+                        <input type="number" step="0.1" class="form-control" th:field="*{batteryCapacity}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Range (km)</label>
+                        <input type="number" class="form-control" th:field="*{rangeKm}">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg"></i> Save</button>
+                    <a href="/vehicles" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
