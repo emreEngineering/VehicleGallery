@@ -21,6 +21,7 @@ Kriterler				Proje önerisinde doğru veritabanı (PostgreSQL) seçilmiş ve Pos
 
 
 
+git remote set-head origin -a
 
 
 
