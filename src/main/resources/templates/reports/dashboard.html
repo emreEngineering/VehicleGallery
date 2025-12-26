@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raporlar - Araç Galerisi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: #1a1a2e;
+            --sidebar-bg: #16213e;
+            --accent: #e94560;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            padding: 0;
+            position: fixed;
+            width: 260px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            background: var(--primary-gradient);
+            text-align: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary) !important;
+            background: rgba(233, 69, 96, 0.1);
+            border-left-color: var(--accent);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .report-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .report-card h5 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.positive {
+            color: #43e97b;
+        }
+
+        .stat-value.pending {
+            color: #ffc107;
+        }
+
+        .stat-value.negative {
+            color: #e94560;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h4><i class="bi bi-car-front-fill"></i> Araç Galerisi</h4>
+            <small>Yönetim Sistemi</small>
+        </div>
+        <nav class="nav flex-column mt-3">
+            <a class="nav-link" href="/"><i class="bi bi-speedometer2"></i> Ana Sayfa</a>
+            <a class="nav-link" href="/vehicles"><i class="bi bi-car-front"></i> Araçlar</a>
+            <a class="nav-link" href="/customers"><i class="bi bi-people"></i> Müşteriler</a>
+            <a class="nav-link" href="/listings"><i class="bi bi-megaphone"></i> İlanlar</a>
+            <a class="nav-link" href="/sales"><i class="bi bi-cash-stack"></i> Satışlar</a>
+            <a class="nav-link" href="/rentals"><i class="bi bi-key"></i> Kiralamalar</a>
+            <a class="nav-link" href="/services"><i class="bi bi-wrench"></i> Servisler</a>
+            <a class="nav-link active" href="/reports"><i class="bi bi-graph-up"></i> Raporlar</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-graph-up"></i> Raporlar</h2>
+            <span class="text-secondary"
+                th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}">Date</span>
+        </div>
+
+        <div class="row">
+            <!-- Satış Özeti Raporu -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <h5><i class="bi bi-cash-stack"></i> Satış Özeti Raporu</h5>
+                    <div class="stat-row">
+                        <span class="stat-label">Tamamlanan Satışlar</span>
+                        <span class="stat-value positive" th:text="${salesSummary.completedCount}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Bekleyen Satışlar</span>
+                        <span class="stat-value pending" th:text="${salesSummary.pendingCount}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Toplam Gelir (Tamamlanan)</span>
+                        <span class="stat-value positive"
+                            th:text="'$' + ${#numbers.formatDecimal(salesSummary.completedTotal, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Ortalama Satış</span>
+                        <span class="stat-value"
+                            th:text="'$' + ${#numbers.formatDecimal(salesSummary.avgCompleted, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">En Yüksek Satış</span>
+                        <span class="stat-value"
+                            th:text="'$' + ${#numbers.formatDecimal(salesSummary.maxSale, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">En Düşük Satış</span>
+                        <span class="stat-value"
+                            th:text="'$' + ${#numbers.formatDecimal(salesSummary.minSale, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Araç Envanteri Raporu -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <h5><i class="bi bi-car-front"></i> Araç Envanteri Raporu</h5>
+                    <div class="stat-row">
+                        <span class="stat-label">Toplam Araç</span>
+                        <span class="stat-value" th:text="${vehicleInventory.totalVehicles}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Elektrikli Araçlar</span>
+                        <span class="stat-value positive" th:text="${vehicleInventory.electricCount}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Yakıtlı Araçlar</span>
+                        <span class="stat-value pending" th:text="${vehicleInventory.fuelCount}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Hibrit Araçlar</span>
+                        <span class="stat-value" th:text="${vehicleInventory.hybridCount}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Ortalama Kilometre</span>
+                        <span class="stat-value"
+                            th:text="${#numbers.formatDecimal(vehicleInventory.avgMileage, 0, 'COMMA', 0, 'POINT')} + ' km'">0
+                            km</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İlan Durumu Raporu -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <h5><i class="bi bi-megaphone"></i> İlan Durumu Raporu</h5>
+                    <div class="stat-row">
+                        <span class="stat-label">Toplam İlan</span>
+                        <span class="stat-value" th:text="${listingStatus.totalListings}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Aktif İlanlar</span>
+                        <span class="stat-value positive" th:text="${listingStatus.activeListings}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Satılık İlanlar</span>
+                        <span class="stat-value" th:text="${listingStatus.saleListings}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Kiralık İlanlar</span>
+                        <span class="stat-value" th:text="${listingStatus.rentalListings}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Ortalama Satış Fiyatı</span>
+                        <span class="stat-value"
+                            th:text="'$' + ${#numbers.formatDecimal(listingStatus.avgSalePrice, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Ortalama Günlük Ücret</span>
+                        <span class="stat-value"
+                            th:text="'$' + ${#numbers.formatDecimal(listingStatus.avgDailyRate, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kiralama Raporu -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <h5><i class="bi bi-key"></i> Kiralama Raporu</h5>
+                    <div class="stat-row">
+                        <span class="stat-label">Toplam Kiralama</span>
+                        <span class="stat-value" th:text="${rentalReport.totalRentals}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Aktif Kiralamalar</span>
+                        <span class="stat-value positive" th:text="${rentalReport.activeRentals}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tamamlanan Kiralamalar</span>
+                        <span class="stat-value" th:text="${rentalReport.completedRentals}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Toplam Kiralama Geliri</span>
+                        <span class="stat-value positive"
+                            th:text="'$' + ${#numbers.formatDecimal(rentalReport.totalRentalRevenue, 0, 'COMMA', 2, 'POINT')}">$0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Ortalama Kiralama Süresi</span>
+                        <span class="stat-value"
+                            th:text="${#numbers.formatDecimal(rentalReport.avgRentalDuration, 0, 'COMMA', 1, 'POINT')} + ' gün'">0
+                            gün</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Müşteri Analizi -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <h5><i class="bi bi-people"></i> Müşteri Analizi</h5>
+                    <div class="stat-row">
+                        <span class="stat-label">Toplam Müşteri</span>
+                        <span class="stat-value" th:text="${customerAnalysis.totalCustomers}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Bireysel Müşteriler</span>
+                        <span class="stat-value" th:text="${customerAnalysis.individualCustomers}">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Kurumsal Müşteriler</span>
+                        <span class="stat-value" th:text="${customerAnalysis.corporateCustomers}">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
