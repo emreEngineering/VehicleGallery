@@ -4,6 +4,7 @@ import com.vehiclegallery.entity.Rental;
 import com.vehiclegallery.service.RentalService;
 import com.vehiclegallery.service.CustomerService;
 import com.vehiclegallery.service.ListingService;
+import com.vehiclegallery.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vehiclegallery.entity.Customer;
 import org.springframework.stereotype.Controller;
@@ -26,9 +27,22 @@ public class RentalController {
     @Autowired
     private ListingService listingService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping
-    public String list(Model model) {
+    public String list(Model model, HttpSession session) {
         model.addAttribute("rentals", rentalService.findAll());
+
+        // Galerici kontrolü
+        String userType = (String) session.getAttribute("userType");
+        boolean isDealer = "DEALER".equals(userType);
+        model.addAttribute("isDealer", isDealer);
+
+        // Bekleyen talep sayısı
+        long pendingCount = rentalService.findByStatus("PENDING").size();
+        model.addAttribute("pendingCount", pendingCount);
+
         return "rentals/list";
     }
 
@@ -91,18 +105,48 @@ public class RentalController {
             return "redirect:/login";
         }
 
+        // Tarih parsing kontrolü
+        LocalDate start;
+        LocalDate end;
+        try {
+            start = LocalDate.parse(startDate);
+            end = LocalDate.parse(endDate);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Geçersiz tarih formatı! Lütfen tarihleri doğru giriniz.");
+            return "redirect:/listings";
+        }
+
+        // Tarih validasyonu
+        if (end.isBefore(start)) {
+            redirectAttributes.addFlashAttribute("error", "Bitiş tarihi başlangıç tarihinden önce olamaz!");
+            return "redirect:/rentals/rent/" + listingId;
+        }
+
+        if (start.isBefore(LocalDate.now())) {
+            redirectAttributes.addFlashAttribute("error", "Başlangıç tarihi bugünden önce olamaz!");
+            return "redirect:/rentals/rent/" + listingId;
+        }
+
         return listingService.findById(listingId)
                 .map(listing -> {
-                    LocalDate start = LocalDate.parse(startDate);
-                    LocalDate end = LocalDate.parse(endDate);
+                    // Çakışma kontrolü
+                    Long vehicleId = listing.getVehicle().getId();
+                    if (rentalService.hasConflictingRentals(vehicleId, start, end)) {
+                        redirectAttributes.addFlashAttribute("error",
+                                "Bu araç seçilen tarihler arasında başka bir kiralama için ayrılmış!");
+                        return "redirect:/rentals/rent/" + listingId;
+                    }
+
                     long days = java.time.temporal.ChronoUnit.DAYS.between(start, end);
+                    if (days < 1)
+                        days = 1; // Minimum 1 gün
 
                     Rental rental = new Rental();
                     rental.setListing(listing);
                     rental.setCustomer((Customer) user);
                     rental.setStartDate(start);
                     rental.setEndDate(end);
-                    rental.setTotalCost(listing.getDailyRate() * days);
+                    rental.setTotalCost(listing.getDailyRate() != null ? listing.getDailyRate() * days : 0);
                     rental.setStatus("PENDING");
                     rentalService.save(rental);
 
@@ -147,5 +191,59 @@ public class RentalController {
         rentalService.deleteById(id);
         redirectAttributes.addFlashAttribute("success", "Kiralama başarıyla silindi!");
         return "redirect:/rentals";
+    }
+
+    // Galerici: Kiralama talebini onayla
+    @GetMapping("/{id}/approve")
+    public String approve(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        String userType = (String) session.getAttribute("userType");
+        if (!"DEALER".equals(userType)) {
+            return "redirect:/login";
+        }
+
+        return rentalService.findById(id)
+                .map(rental -> {
+                    rental.setStatus("ACTIVE");
+                    rentalService.save(rental);
+
+                    // Müşteriye bildirim gönder
+                    if (rental.getCustomer() != null && rental.getListing() != null) {
+                        String vehicleInfo = rental.getListing().getVehicle().getBrand() + " " +
+                                rental.getListing().getVehicle().getModel();
+                        notificationService.sendRentalApprovedNotification(rental.getCustomer(), rental.getId(),
+                                vehicleInfo);
+                    }
+
+                    redirectAttributes.addFlashAttribute("success", "Kiralama onaylandı!");
+                    return "redirect:/rentals";
+                })
+                .orElse("redirect:/rentals");
+    }
+
+    // Galerici: Kiralama talebini reddet
+    @GetMapping("/{id}/reject")
+    public String reject(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        String userType = (String) session.getAttribute("userType");
+        if (!"DEALER".equals(userType)) {
+            return "redirect:/login";
+        }
+
+        return rentalService.findById(id)
+                .map(rental -> {
+                    rental.setStatus("CANCELLED");
+                    rentalService.save(rental);
+
+                    // Müşteriye bildirim gönder
+                    if (rental.getCustomer() != null && rental.getListing() != null) {
+                        String vehicleInfo = rental.getListing().getVehicle().getBrand() + " " +
+                                rental.getListing().getVehicle().getModel();
+                        notificationService.sendRentalRejectedNotification(rental.getCustomer(), rental.getId(),
+                                vehicleInfo);
+                    }
+
+                    redirectAttributes.addFlashAttribute("success", "Kiralama reddedildi!");
+                    return "redirect:/rentals";
+                })
+                .orElse("redirect:/rentals");
     }
 }

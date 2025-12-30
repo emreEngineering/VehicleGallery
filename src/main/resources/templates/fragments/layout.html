@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' | Vehicle Gallery'">Vehicle Gallery</title>
+    <title th:text="${title} + ' | Araç Galerisi'">Araç Galerisi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -165,6 +165,91 @@
             background: #20c997;
         }
 
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        .splash-content {
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .splash-logo {
+            font-size: 4rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .splash-text {
+            font-size: 2rem;
+            font-weight: bold;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .splash-loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .badge-corporate {
             background: #6610f2;
         }
@@ -172,21 +257,48 @@
 </head>
 
 <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i class="bi bi-car-front-fill"></i>
+            </div>
+            <div class="splash-text">Araç Galerisi</div>
+            <div class="splash-loader"></div>
+            <p class="text-muted mt-3">Yükleniyor...</p>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-brand">
-            <h4><i class="bi bi-car-front-fill"></i> VehicleGallery</h4>
+            <h4><i class="bi bi-car-front-fill"></i> Araç Galerisi</h4>
             <small th:if="${isDealer}">Galeri Yönetimi</small>
             <small th:unless="${isDealer}">Müşteri Paneli</small>
         </div>
         <nav class="nav flex-column mt-3">
-            <a class="nav-link" href="/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link" href="/"><i class="bi bi-speedometer2"></i> Ana Sayfa</a>
             <a class="nav-link" href="/vehicles"><i class="bi bi-car-front"></i> Araçlar</a>
             <a class="nav-link" th:if="${isDealer}" href="/customers"><i class="bi bi-people"></i> Müşteriler</a>
             <a class="nav-link" href="/listings"><i class="bi bi-megaphone"></i> İlanlar</a>
+
+            <!-- Dealer Specific Links -->
+            <a class="nav-link" th:if="${isDealer}" href="/my-listings"><i class="bi bi-collection-fill"></i>
+                İlanlarım</a>
+            <a class="nav-link" th:if="${isDealer}" href="/dealer-offers"><i class="bi bi-inbox-fill"></i> Gelen
+                Teklifler</a>
+
+            <!-- Customer Specific Links -->
+            <a class="nav-link" th:unless="${isDealer}" href="/my-offers"><i class="bi bi-tag-fill"></i> Tekliflerim</a>
+
+            <!-- Common Links -->
+            <a class="nav-link" href="/my-addresses"><i class="bi bi-geo-alt-fill"></i> Adreslerim</a>
+            <a class="nav-link" href="/my-bank-accounts"><i class="bi bi-wallet2"></i> Banka Hesaplarım</a>
+
             <a class="nav-link" href="/sales"><i class="bi bi-cash-stack"></i> Satışlar</a>
             <a class="nav-link" href="/rentals"><i class="bi bi-key"></i> Kiralamalar</a>
             <a class="nav-link" th:if="${isDealer}" href="/services"><i class="bi bi-wrench"></i> Servisler</a>
+            <a class="nav-link" th:unless="${isDealer}" href="/notifications"><i class="bi bi-bell"></i> Bildirimler</a>
         </nav>
 
         <!-- User Info -->
@@ -212,6 +324,24 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const splash = document.getElementById('splashScreen');
+
+            // Check if splash has been shown in this session
+            if (!sessionStorage.getItem('splashShown')) {
+                // First visit
+                setTimeout(() => {
+                    splash.style.opacity = '0';
+                    splash.style.visibility = 'hidden';
+                    sessionStorage.setItem('splashShown', 'true');
+                }, 2500); // 2.5 seconds delay
+            } else {
+                // Already shown, hide immediately
+                splash.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -4,6 +4,7 @@ import com.vehiclegallery.entity.Sale;
 import com.vehiclegallery.service.SaleService;
 import com.vehiclegallery.service.CustomerService;
 import com.vehiclegallery.service.ListingService;
+import com.vehiclegallery.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vehiclegallery.entity.Customer;
 import org.springframework.stereotype.Controller;
@@ -26,9 +27,22 @@ public class SaleController {
     @Autowired
     private ListingService listingService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping
-    public String list(Model model) {
+    public String list(Model model, HttpSession session) {
         model.addAttribute("sales", saleService.findAll());
+
+        // Galerici kontrolü
+        String userType = (String) session.getAttribute("userType");
+        boolean isDealer = "DEALER".equals(userType);
+        model.addAttribute("isDealer", isDealer);
+
+        // Bekleyen talep sayısı
+        long pendingCount = saleService.findByStatus("PENDING").size();
+        model.addAttribute("pendingCount", pendingCount);
+
         return "sales/list";
     }
 
@@ -98,10 +112,6 @@ public class SaleController {
                     sale.setStatus("PENDING");
                     saleService.save(sale);
 
-                    // İlanı pasif yap
-                    listing.setIsActive(false);
-                    listingService.save(listing);
-
                     redirectAttributes.addFlashAttribute("success", "Satın alma talebiniz oluşturuldu!");
                     return "redirect:/sales";
                 })
@@ -143,5 +153,63 @@ public class SaleController {
         saleService.deleteById(id);
         redirectAttributes.addFlashAttribute("success", "Satış başarıyla silindi!");
         return "redirect:/sales";
+    }
+
+    // Galerici: Satış talebini onayla
+    @GetMapping("/{id}/approve")
+    public String approve(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        String userType = (String) session.getAttribute("userType");
+        if (!"DEALER".equals(userType)) {
+            return "redirect:/login";
+        }
+
+        return saleService.findById(id)
+                .map(sale -> {
+                    sale.setStatus("COMPLETED");
+                    saleService.save(sale);
+
+                    // İlanı pasif yap
+                    if (sale.getListing() != null) {
+                        sale.getListing().setIsActive(false);
+                        listingService.save(sale.getListing());
+                    }
+
+                    // Müşteriye bildirim gönder
+                    if (sale.getCustomer() != null && sale.getListing() != null) {
+                        String vehicleInfo = sale.getListing().getVehicle().getBrand() + " " +
+                                sale.getListing().getVehicle().getModel();
+                        notificationService.sendSaleApprovedNotification(sale.getCustomer(), sale.getId(), vehicleInfo);
+                    }
+
+                    redirectAttributes.addFlashAttribute("success", "Satış onaylandı!");
+                    return "redirect:/sales";
+                })
+                .orElse("redirect:/sales");
+    }
+
+    // Galerici: Satış talebini reddet
+    @GetMapping("/{id}/reject")
+    public String reject(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        String userType = (String) session.getAttribute("userType");
+        if (!"DEALER".equals(userType)) {
+            return "redirect:/login";
+        }
+
+        return saleService.findById(id)
+                .map(sale -> {
+                    sale.setStatus("CANCELLED");
+                    saleService.save(sale);
+
+                    // Müşteriye bildirim gönder
+                    if (sale.getCustomer() != null && sale.getListing() != null) {
+                        String vehicleInfo = sale.getListing().getVehicle().getBrand() + " " +
+                                sale.getListing().getVehicle().getModel();
+                        notificationService.sendSaleRejectedNotification(sale.getCustomer(), sale.getId(), vehicleInfo);
+                    }
+
+                    redirectAttributes.addFlashAttribute("success", "Satış reddedildi!");
+                    return "redirect:/sales";
+                })
+                .orElse("redirect:/sales");
     }
 }

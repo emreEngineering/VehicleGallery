@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hata - Vehicle Gallery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #eaeaea;
+        }
+
+        .error-card {
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            color: #e94560;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-title {
+            color: #e94560;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: #a0a0a0;
+            margin-bottom: 2rem;
+        }
+
+        .error-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="error-card">
+        <i class="bi bi-exclamation-triangle-fill error-icon"></i>
+        <h2 class="error-title">Bir Hata Oluştu</h2>
+        <p class="error-message" th:text="${error != null ? error : 'Beklenmeyen bir hata oluştu.'}">Hata mesajı</p>
+
+        <div class="error-details" th:if="${errorDetails != null}">
+            <strong>Detay:</strong> <span th:text="${errorDetails}">Hata detayı</span>
+        </div>
+
+        <a href="/" class="btn-back"><i class="bi bi-house-fill"></i> Ana Sayfaya Dön</a>
+        <br><br>
+        <a href="javascript:history.back()" class="text-secondary"><i class="bi bi-arrow-left"></i> Geri Git</a>
+    </div>
+</body>
+
+</html>

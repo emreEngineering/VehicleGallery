@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='Vehicle Details', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-info-circle"></i> Araç Detayları</h2>
+            <a href="/vehicles" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Geri Dön</a>
+        </div>
+
+        <!-- Master View: Vehicle Info -->
+        <div class="form-card mb-4" th:object="${vehicle}">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="text-accent mb-3" th:text="*{brand + ' ' + model}">Brand Model</h4>
+                    <p><strong>Yıl:</strong> <span th:text="*{productionYear}">2023</span></p>
+                    <p><strong>Renk:</strong> <span th:text="*{color}">Red</span></p>
+                    <p><strong>Plaka:</strong> <span th:text="*{plateNumber}">34 ABC 123</span></p>
+                    <p><strong>KM:</strong> <span th:text="*{mileage}">10000</span> km</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mt-2">Teknik Detaylar</h5>
+                    <p><strong>Şasi No:</strong> <span th:text="*{chassisNumber}">123456</span></p>
+                    <p><strong>Tip:</strong>
+                        <span class="badge"
+                            th:classappend="*{vehicleType == 'FUEL' ? 'badge-fuel' : (vehicleType == 'ELECTRIC' ? 'badge-electric' : 'badge-hybrid')}"
+                            th:text="*{vehicleType}">Type</span>
+                    </p>
+                    <!-- Type Specific Details can be added here if available in the model object -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail View: Service Records -->
+        <div class="form-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4><i class="bi bi-wrench"></i> Servis Geçmişi</h4>
+                <a href="/services/new" class="btn btn-sm btn-accent"><i class="bi bi-plus-lg"></i> Yeni Kayıt</a>
+            </div>
+
+            <div class="table-responsive" th:if="${not #lists.isEmpty(serviceRecords)}">
+                <table class="table text-light">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Açıklama</th>
+                            <th>Maliyet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="record : ${serviceRecords}">
+                            <td th:text="${record.date}">2023-01-01</td>
+                            <td th:text="${record.description}">Bakım</td>
+                            <td th:text="${record.cost} + ' TL'">1000 TL</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${#lists.isEmpty(serviceRecords)}" class="text-center text-muted p-3">
+                <p>Henüz servis kaydı bulunmamaktadır.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
