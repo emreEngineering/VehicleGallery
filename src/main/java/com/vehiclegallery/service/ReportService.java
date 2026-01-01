@@ -1,7 +1,8 @@
 package com.vehiclegallery.service;
 
 import com.vehiclegallery.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
@@ -9,207 +10,246 @@ import java.util.*;
 /**
  * Raporlama Servisi
  * Satış, kiralama, araç ve müşteri raporları oluşturur
+ * VIEW'lar üzerinden de veri çeker
  */
 @Service
+@RequiredArgsConstructor
 public class ReportService {
 
-    @Autowired
-    private SaleRepository saleRepository;
+        private final SaleRepository saleRepository;
+        private final RentalRepository rentalRepository;
+        private final VehicleRepository vehicleRepository;
+        private final CustomerRepository customerRepository;
+        private final ListingRepository listingRepository;
+        private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private RentalRepository rentalRepository;
+        // =====================================================
+        // VIEW SORGULARI - Soru 19 için
+        // =====================================================
 
-    @Autowired
-    private VehicleRepository vehicleRepository;
+        /**
+         * Aktif İlanlar VIEW'ından veri çeker
+         * VIEW: vw_active_listings
+         */
+        public List<Map<String, Object>> getActiveListingsFromView() {
+                String sql = "SELECT * FROM vw_active_listings ORDER BY publish_date DESC";
+                return jdbcTemplate.queryForList(sql);
+        }
 
-    @Autowired
-    private CustomerRepository customerRepository;
+        /**
+         * Satış Özeti VIEW'ından veri çeker
+         * VIEW: vw_sales_summary
+         */
+        public List<Map<String, Object>> getSalesSummaryFromView() {
+                String sql = "SELECT * FROM vw_sales_summary ORDER BY sale_date DESC";
+                return jdbcTemplate.queryForList(sql);
+        }
 
-    @Autowired
-    private ListingRepository listingRepository;
+        /**
+         * Müşteri Kiralamaları VIEW'ından veri çeker
+         * VIEW: vw_customer_rentals
+         */
+        public List<Map<String, Object>> getCustomerRentalsFromView() {
+                String sql = "SELECT * FROM vw_customer_rentals ORDER BY start_date DESC";
+                return jdbcTemplate.queryForList(sql);
+        }
 
-    /**
-     * Satış Özet Raporu
-     */
-    public Map<String, Object> getSalesSummaryReport() {
-        Map<String, Object> report = new LinkedHashMap<>();
+        /**
+         * Araç Detayları VIEW'ından veri çeker
+         * VIEW: vw_vehicle_details
+         */
+        public List<Map<String, Object>> getVehicleDetailsFromView() {
+                String sql = "SELECT * FROM vw_vehicle_details ORDER BY brand, model";
+                return jdbcTemplate.queryForList(sql);
+        }
 
-        // Toplam satış sayıları (durum bazlı)
-        report.put("completedCount", saleRepository.countByStatus("COMPLETED"));
-        report.put("pendingCount", saleRepository.countByStatus("PENDING"));
-        report.put("cancelledCount", saleRepository.countByStatus("CANCELLED"));
+        // =====================================================
+        // MEVCUT RAPORLAR
+        // =====================================================
 
-        // Toplam tutarlar
-        report.put("completedTotal", saleRepository.sumAmountByStatus("COMPLETED"));
-        report.put("pendingTotal", saleRepository.sumAmountByStatus("PENDING"));
+        /**
+         * Satış Özet Raporu
+         */
+        public Map<String, Object> getSalesSummaryReport() {
+                Map<String, Object> report = new LinkedHashMap<>();
 
-        // Ortalamalar
-        report.put("avgCompleted", saleRepository.avgAmountByStatus("COMPLETED"));
-        report.put("avgPending", saleRepository.avgAmountByStatus("PENDING"));
+                // Toplam satış sayıları (durum bazlı)
+                report.put("completedCount", saleRepository.countByStatus("COMPLETED"));
+                report.put("pendingCount", saleRepository.countByStatus("PENDING"));
+                report.put("cancelledCount", saleRepository.countByStatus("CANCELLED"));
 
-        // Min/Max
-        report.put("minSale", saleRepository.minAmountByStatus("COMPLETED"));
-        report.put("maxSale", saleRepository.maxAmountByStatus("COMPLETED"));
+                // Toplam tutarlar
+                report.put("completedTotal", saleRepository.sumAmountByStatus("COMPLETED"));
+                report.put("pendingTotal", saleRepository.sumAmountByStatus("PENDING"));
 
-        return report;
-    }
+                // Ortalamalar
+                report.put("avgCompleted", saleRepository.avgAmountByStatus("COMPLETED"));
+                report.put("avgPending", saleRepository.avgAmountByStatus("PENDING"));
 
-    /**
-     * Aylık Satış Raporu
-     */
-    public Map<String, Object> getMonthlySalesReport(int year, int month) {
-        Map<String, Object> report = new LinkedHashMap<>();
+                // Min/Max
+                report.put("minSale", saleRepository.minAmountByStatus("COMPLETED"));
+                report.put("maxSale", saleRepository.maxAmountByStatus("COMPLETED"));
 
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+                return report;
+        }
 
-        report.put("year", year);
-        report.put("month", month);
-        report.put("startDate", startDate);
-        report.put("endDate", endDate);
-        report.put("totalAmount", saleRepository.sumAmountByDateRange(startDate, endDate));
+        /**
+         * Aylık Satış Raporu
+         */
+        public Map<String, Object> getMonthlySalesReport(int year, int month) {
+                Map<String, Object> report = new LinkedHashMap<>();
 
-        return report;
-    }
+                LocalDate startDate = LocalDate.of(year, month, 1);
+                LocalDate endDate = startDate.plusMonths(1).minusDays(1);
 
-    /**
-     * Araç Envanteri Raporu
-     */
-    public Map<String, Object> getVehicleInventoryReport() {
-        Map<String, Object> report = new LinkedHashMap<>();
+                report.put("year", year);
+                report.put("month", month);
+                report.put("startDate", startDate);
+                report.put("endDate", endDate);
+                report.put("totalAmount", saleRepository.sumAmountByDateRange(startDate, endDate));
 
-        var allVehicles = vehicleRepository.findAll();
+                return report;
+        }
 
-        // Toplam araç sayısı
-        report.put("totalVehicles", (long) allVehicles.size());
+        /**
+         * Araç Envanteri Raporu
+         */
+        public Map<String, Object> getVehicleInventoryReport() {
+                Map<String, Object> report = new LinkedHashMap<>();
 
-        // Araç tipi bazlı dağılım
-        long electricCount = allVehicles.stream()
-                .filter(v -> "ELECTRIC".equals(v.getVehicleType())).count();
-        long fuelCount = allVehicles.stream()
-                .filter(v -> "FUEL".equals(v.getVehicleType())).count();
-        long hybridCount = allVehicles.stream()
-                .filter(v -> "HYBRID".equals(v.getVehicleType())).count();
+                var allVehicles = vehicleRepository.findAll();
 
-        report.put("electricCount", electricCount);
-        report.put("fuelCount", fuelCount);
-        report.put("hybridCount", hybridCount);
+                // Toplam araç sayısı
+                report.put("totalVehicles", (long) allVehicles.size());
 
-        // Marka bazlı dağılım
-        Map<String, Long> brandCounts = new LinkedHashMap<>();
-        allVehicles.stream()
-                .collect(java.util.stream.Collectors.groupingBy(
-                        v -> v.getBrand(),
-                        java.util.stream.Collectors.counting()))
-                .entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .forEach(e -> brandCounts.put(e.getKey(), e.getValue()));
-        report.put("brandDistribution", brandCounts);
+                // Araç tipi bazlı dağılım
+                long electricCount = allVehicles.stream()
+                                .filter(v -> "ELECTRIC".equals(v.getVehicleType())).count();
+                long fuelCount = allVehicles.stream()
+                                .filter(v -> "FUEL".equals(v.getVehicleType())).count();
+                long hybridCount = allVehicles.stream()
+                                .filter(v -> "HYBRID".equals(v.getVehicleType())).count();
 
-        // Ortalama kilometre
-        double avgMileage = allVehicles.stream()
-                .filter(v -> v.getMileage() != null)
-                .mapToInt(v -> v.getMileage())
-                .average().orElse(0);
-        report.put("avgMileage", avgMileage);
+                report.put("electricCount", electricCount);
+                report.put("fuelCount", fuelCount);
+                report.put("hybridCount", hybridCount);
 
-        return report;
-    }
+                // Marka bazlı dağılım
+                Map<String, Long> brandCounts = new LinkedHashMap<>();
+                allVehicles.stream()
+                                .collect(java.util.stream.Collectors.groupingBy(
+                                                v -> v.getBrand(),
+                                                java.util.stream.Collectors.counting()))
+                                .entrySet().stream()
+                                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                                .forEach(e -> brandCounts.put(e.getKey(), e.getValue()));
+                report.put("brandDistribution", brandCounts);
 
-    /**
-     * İlan Durumu Raporu
-     */
-    public Map<String, Object> getListingStatusReport() {
-        Map<String, Object> report = new LinkedHashMap<>();
+                // Ortalama kilometre
+                double avgMileage = allVehicles.stream()
+                                .filter(v -> v.getMileage() != null)
+                                .mapToInt(v -> v.getMileage())
+                                .average().orElse(0);
+                report.put("avgMileage", avgMileage);
 
-        var allListings = listingRepository.findAll();
-        var activeListings = listingRepository.findByIsActiveTrue();
+                return report;
+        }
 
-        report.put("totalListings", (long) allListings.size());
-        report.put("activeListings", (long) activeListings.size());
-        report.put("inactiveListings", (long) (allListings.size() - activeListings.size()));
+        /**
+         * İlan Durumu Raporu
+         */
+        public Map<String, Object> getListingStatusReport() {
+                Map<String, Object> report = new LinkedHashMap<>();
 
-        // Tip bazlı dağılım
-        long saleListings = allListings.stream()
-                .filter(l -> "SALE".equals(l.getListingType())).count();
-        long rentalListings = allListings.stream()
-                .filter(l -> "RENTAL".equals(l.getListingType())).count();
+                var allListings = listingRepository.findAll();
+                var activeListings = listingRepository.findByIsActiveTrue();
 
-        report.put("saleListings", saleListings);
-        report.put("rentalListings", rentalListings);
+                report.put("totalListings", (long) allListings.size());
+                report.put("activeListings", (long) activeListings.size());
+                report.put("inactiveListings", (long) (allListings.size() - activeListings.size()));
 
-        // Ortalama fiyatlar
-        double avgSalePrice = allListings.stream()
-                .filter(l -> "SALE".equals(l.getListingType()) && l.getPrice() != null)
-                .mapToDouble(l -> l.getPrice())
-                .average().orElse(0);
+                // Tip bazlı dağılım
+                long saleListings = allListings.stream()
+                                .filter(l -> "SALE".equals(l.getListingType())).count();
+                long rentalListings = allListings.stream()
+                                .filter(l -> "RENTAL".equals(l.getListingType())).count();
 
-        double avgDailyRate = allListings.stream()
-                .filter(l -> "RENTAL".equals(l.getListingType()) && l.getDailyRate() != null)
-                .mapToDouble(l -> l.getDailyRate())
-                .average().orElse(0);
+                report.put("saleListings", saleListings);
+                report.put("rentalListings", rentalListings);
 
-        report.put("avgSalePrice", avgSalePrice);
-        report.put("avgDailyRate", avgDailyRate);
+                // Ortalama fiyatlar
+                double avgSalePrice = allListings.stream()
+                                .filter(l -> "SALE".equals(l.getListingType()) && l.getPrice() != null)
+                                .mapToDouble(l -> l.getPrice())
+                                .average().orElse(0);
 
-        return report;
-    }
+                double avgDailyRate = allListings.stream()
+                                .filter(l -> "RENTAL".equals(l.getListingType()) && l.getDailyRate() != null)
+                                .mapToDouble(l -> l.getDailyRate())
+                                .average().orElse(0);
 
-    /**
-     * Müşteri Analiz Raporu
-     */
-    public Map<String, Object> getCustomerAnalysisReport() {
-        Map<String, Object> report = new LinkedHashMap<>();
+                report.put("avgSalePrice", avgSalePrice);
+                report.put("avgDailyRate", avgDailyRate);
 
-        var allCustomers = customerRepository.findAll();
+                return report;
+        }
 
-        report.put("totalCustomers", (long) allCustomers.size());
+        /**
+         * Müşteri Analiz Raporu
+         */
+        public Map<String, Object> getCustomerAnalysisReport() {
+                Map<String, Object> report = new LinkedHashMap<>();
 
-        // Tip bazlı dağılım
-        long individualCount = allCustomers.stream()
-                .filter(c -> "INDIVIDUAL".equals(c.getCustomerType())).count();
-        long corporateCount = allCustomers.stream()
-                .filter(c -> "CORPORATE".equals(c.getCustomerType())).count();
+                var allCustomers = customerRepository.findAll();
 
-        report.put("individualCustomers", individualCount);
-        report.put("corporateCustomers", corporateCount);
+                report.put("totalCustomers", (long) allCustomers.size());
 
-        return report;
-    }
+                // Tip bazlı dağılım
+                long individualCount = allCustomers.stream()
+                                .filter(c -> "INDIVIDUAL".equals(c.getCustomerType())).count();
+                long corporateCount = allCustomers.stream()
+                                .filter(c -> "CORPORATE".equals(c.getCustomerType())).count();
 
-    /**
-     * Kiralama Raporu
-     */
-    public Map<String, Object> getRentalReport() {
-        Map<String, Object> report = new LinkedHashMap<>();
+                report.put("individualCustomers", individualCount);
+                report.put("corporateCustomers", corporateCount);
 
-        var allRentals = rentalRepository.findAll();
+                return report;
+        }
 
-        report.put("totalRentals", (long) allRentals.size());
+        /**
+         * Kiralama Raporu
+         */
+        public Map<String, Object> getRentalReport() {
+                Map<String, Object> report = new LinkedHashMap<>();
 
-        // Durum bazlı
-        long activeRentals = allRentals.stream()
-                .filter(r -> "ACTIVE".equals(r.getStatus())).count();
-        long completedRentals = allRentals.stream()
-                .filter(r -> "COMPLETED".equals(r.getStatus())).count();
+                var allRentals = rentalRepository.findAll();
 
-        report.put("activeRentals", activeRentals);
-        report.put("completedRentals", completedRentals);
+                report.put("totalRentals", (long) allRentals.size());
 
-        // Toplam gelir
-        double totalRentalRevenue = allRentals.stream()
-                .filter(r -> r.getTotalCost() != null)
-                .mapToDouble(r -> r.getTotalCost())
-                .sum();
-        report.put("totalRentalRevenue", totalRentalRevenue);
+                // Durum bazlı
+                long activeRentals = allRentals.stream()
+                                .filter(r -> "ACTIVE".equals(r.getStatus())).count();
+                long completedRentals = allRentals.stream()
+                                .filter(r -> "COMPLETED".equals(r.getStatus())).count();
 
-        // Ortalama kiralama süresi
-        double avgDuration = allRentals.stream()
-                .filter(r -> r.getStartDate() != null && r.getEndDate() != null)
-                .mapToLong(r -> java.time.temporal.ChronoUnit.DAYS.between(r.getStartDate(), r.getEndDate()))
-                .average().orElse(0);
-        report.put("avgRentalDuration", avgDuration);
+                report.put("activeRentals", activeRentals);
+                report.put("completedRentals", completedRentals);
 
-        return report;
-    }
+                // Toplam gelir
+                double totalRentalRevenue = allRentals.stream()
+                                .filter(r -> r.getTotalCost() != null)
+                                .mapToDouble(r -> r.getTotalCost())
+                                .sum();
+                report.put("totalRentalRevenue", totalRentalRevenue);
+
+                // Ortalama kiralama süresi
+                double avgDuration = allRentals.stream()
+                                .filter(r -> r.getStartDate() != null && r.getEndDate() != null)
+                                .mapToLong(r -> java.time.temporal.ChronoUnit.DAYS.between(r.getStartDate(),
+                                                r.getEndDate()))
+                                .average().orElse(0);
+                report.put("avgRentalDuration", avgDuration);
+
+                return report;
+        }
 }

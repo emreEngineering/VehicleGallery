@@ -1,7 +1,7 @@
 package com.vehiclegallery.controller;
 
 import com.vehiclegallery.service.ReportService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -10,13 +10,14 @@ import java.time.LocalDate;
 /**
  * Raporlama Controller
  * Web tabanlı raporlama sayfalarını yönetir
+ * VIEW'lar üzerinden veri gösterir
  */
 @Controller
 @RequestMapping("/reports")
+@RequiredArgsConstructor
 public class ReportController {
 
-    @Autowired
-    private ReportService reportService;
+    private final ReportService reportService;
 
     /**
      * Rapor Ana Sayfası - Tüm raporların özeti
@@ -29,6 +30,19 @@ public class ReportController {
         model.addAttribute("customerAnalysis", reportService.getCustomerAnalysisReport());
         model.addAttribute("rentalReport", reportService.getRentalReport());
         return "reports/dashboard";
+    }
+
+    /**
+     * VIEW'lar Sayfası - Veritabanı VIEW'larından veri gösterir
+     * Soru 19: Görünüm arayüzde kullanılıyor mu?
+     */
+    @GetMapping("/views")
+    public String viewsReport(Model model) {
+        model.addAttribute("activeListings", reportService.getActiveListingsFromView());
+        model.addAttribute("salesSummary", reportService.getSalesSummaryFromView());
+        model.addAttribute("customerRentals", reportService.getCustomerRentalsFromView());
+        model.addAttribute("vehicleDetails", reportService.getVehicleDetailsFromView());
+        return "reports/views";
     }
 
     /**

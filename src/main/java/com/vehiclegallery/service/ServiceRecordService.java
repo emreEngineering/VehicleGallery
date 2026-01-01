@@ -2,16 +2,16 @@ package com.vehiclegallery.service;
 
 import com.vehiclegallery.entity.ServiceRecord;
 import com.vehiclegallery.repository.ServiceRecordRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceRecordService {
 
-    @Autowired
-    private ServiceRecordRepository serviceRecordRepository;
+    private final ServiceRecordRepository serviceRecordRepository;
 
     public List<ServiceRecord> findAll() {
         return serviceRecordRepository.findAll();

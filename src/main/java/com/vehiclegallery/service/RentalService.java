@@ -2,17 +2,17 @@ package com.vehiclegallery.service;
 
 import com.vehiclegallery.entity.Rental;
 import com.vehiclegallery.repository.RentalRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class RentalService {
 
-    @Autowired
-    private RentalRepository rentalRepository;
+    private final RentalRepository rentalRepository;
 
     public List<Rental> findAll() {
         return rentalRepository.findAll();

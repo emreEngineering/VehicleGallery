@@ -2,16 +2,17 @@ package com.vehiclegallery.service;
 
 import com.vehiclegallery.entity.Sale;
 import com.vehiclegallery.repository.SaleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class SaleService {
 
-    @Autowired
-    private SaleRepository saleRepository;
+    private final SaleRepository saleRepository;
+    private final com.vehiclegallery.repository.BankAccountRepository bankAccountRepository;
 
     public List<Sale> findAll() {
         return saleRepository.findAll();
@@ -34,9 +35,6 @@ public class SaleService {
     public Optional<Sale> findById(Long id) {
         return saleRepository.findById(id);
     }
-
-    @Autowired
-    private com.vehiclegallery.repository.BankAccountRepository bankAccountRepository;
 
     public Sale save(Sale sale) {
         Sale savedSale = saleRepository.save(sale);
@@ -71,7 +69,7 @@ public class SaleService {
 
     public double getTotalRevenue() {
         return saleRepository.findAll().stream()
-                .mapToDouble(s -> s.getAmount() != null ? s.getAmount() : 0)
+                .mapToDouble(s -> s.getAmount() != null ? s.getAmount() : 0.0)
                 .sum();
     }
 }

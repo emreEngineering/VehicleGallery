@@ -525,6 +525,116 @@ CREATE TRIGGER trg_process_money_transfer
     EXECUTE FUNCTION process_money_transfer();
 
 -- =====================================================
+-- GÖRÜNÜMLER (VIEWS)
+-- =====================================================
+
+-- -------------------------------------------------------
+-- VIEW 1: Aktif İlanlar Görünümü
+-- Açıklama: Tüm aktif ilanları araç ve galerici bilgileri
+-- ile birlikte gösterir.
+-- -------------------------------------------------------
+CREATE OR REPLACE VIEW vw_active_listings AS
+SELECT 
+    l.id AS listing_id,
+    l.listing_type,
+    l.price,
+    l.daily_rate,
+    l.publish_date,
+    l.description,
+    v.id AS vehicle_id,
+    v.brand,
+    v.model,
+    v.production_year,
+    v.color,
+    v.plate_number,
+    v.mileage,
+    v.vehicle_type,
+    p.id AS dealer_id,
+    p.first_name || ' ' || p.last_name AS dealer_name,
+    d.company_name AS dealer_company
+FROM listings l
+JOIN vehicles v ON l.vehicle_id = v.id
+JOIN personnel p ON l.dealer_id = p.id
+LEFT JOIN dealers d ON p.id = d.id
+WHERE l.is_active = true;
+
+-- -------------------------------------------------------
+-- VIEW 2: Satış Özet Görünümü
+-- Açıklama: Tamamlanan satışların özet bilgilerini gösterir.
+-- -------------------------------------------------------
+CREATE OR REPLACE VIEW vw_sales_summary AS
+SELECT 
+    s.id AS sale_id,
+    s.date AS sale_date,
+    s.amount,
+    s.status,
+    c.first_name || ' ' || c.last_name AS customer_name,
+    v.brand || ' ' || v.model AS vehicle_info,
+    v.plate_number,
+    d.first_name || ' ' || d.last_name AS dealer_name
+FROM sales s
+JOIN personnel c ON s.customer_id = c.id
+JOIN listings l ON s.listing_id = l.id
+JOIN vehicles v ON l.vehicle_id = v.id
+JOIN personnel d ON l.dealer_id = d.id;
+
+-- -------------------------------------------------------
+-- VIEW 3: Müşteri Kiralama Görünümü
+-- Açıklama: Tüm kiralamaları müşteri ve araç bilgileri
+-- ile birlikte gösterir.
+-- -------------------------------------------------------
+CREATE OR REPLACE VIEW vw_customer_rentals AS
+SELECT 
+    r.id AS rental_id,
+    r.start_date,
+    r.end_date,
+    r.total_cost,
+    r.status,
+    c.id AS customer_id,
+    c.first_name || ' ' || c.last_name AS customer_name,
+    v.id AS vehicle_id,
+    v.brand || ' ' || v.model AS vehicle_info,
+    v.plate_number,
+    l.daily_rate,
+    (r.end_date - r.start_date) AS rental_days
+FROM rentals r
+JOIN personnel c ON r.customer_id = c.id
+JOIN listings l ON r.listing_id = l.id
+JOIN vehicles v ON l.vehicle_id = v.id;
+
+-- -------------------------------------------------------
+-- VIEW 4: Araç Detay Görünümü
+-- Açıklama: Araçların tüm detaylarını servis geçmişi
+-- ve sigorta bilgileri ile gösterir.
+-- -------------------------------------------------------
+CREATE OR REPLACE VIEW vw_vehicle_details AS
+SELECT 
+    v.id AS vehicle_id,
+    v.brand,
+    v.model,
+    v.production_year,
+    v.color,
+    v.plate_number,
+    v.mileage,
+    v.vehicle_type,
+    v.chassis_number,
+    COALESCE(srv.service_count, 0) AS total_services,
+    COALESCE(srv.total_service_cost, 0) AS total_service_cost,
+    COALESCE(ins.active_insurance_count, 0) AS active_insurances
+FROM vehicles v
+LEFT JOIN (
+    SELECT vehicle_id, COUNT(*) AS service_count, SUM(cost) AS total_service_cost
+    FROM service_records
+    GROUP BY vehicle_id
+) srv ON v.id = srv.vehicle_id
+LEFT JOIN (
+    SELECT vehicle_id, COUNT(*) AS active_insurance_count
+    FROM insurances
+    WHERE end_date >= CURRENT_DATE
+    GROUP BY vehicle_id
+) ins ON v.id = ins.vehicle_id;
+
+-- =====================================================
 -- SAKLI PROSEDÜRLER (STORED PROCEDURES)
 -- =====================================================
 

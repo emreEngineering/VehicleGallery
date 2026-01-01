@@ -3,16 +3,16 @@ package com.vehiclegallery.service;
 import com.vehiclegallery.entity.Customer;
 import com.vehiclegallery.entity.Notification;
 import com.vehiclegallery.repository.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
 
     public List<Notification> findByCustomerId(Long customerId) {
         return notificationRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);

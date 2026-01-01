@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veritabanı Görünümleri (VIEW'lar)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table {
+            color: #fff;
+        }
+
+        .table thead th {
+            background: rgba(0, 123, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .table tbody td {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .badge-view {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-pills .nav-link {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0.25rem;
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+        }
+
+        .view-info {
+            background: rgba(99, 102, 241, 0.2);
+            border-left: 4px solid #6366f1;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-car-front"></i> Araç Galerisi</a>
+            <a class="btn btn-outline-light" href="/reports"><i class="bi bi-arrow-left"></i> Raporlara Dön</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="mb-4">
+            <i class="bi bi-database"></i> Veritabanı Görünümleri (VIEW'lar)
+            <span class="badge badge-view ms-2">PostgreSQL</span>
+        </h1>
+
+        <div class="view-info">
+            <h5><i class="bi bi-info-circle"></i> VIEW Nedir?</h5>
+            <p class="mb-0">VIEW'lar, karmaşık sorguları basitleştiren sanal tablolardır. Aşağıdaki veriler doğrudan
+                PostgreSQL VIEW'larından çekilmektedir.</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <ul class="nav nav-pills mb-4" id="viewTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#activeListings">
+                    <i class="bi bi-tags"></i> Aktif İlanlar
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#salesSummary">
+                    <i class="bi bi-cash-stack"></i> Satış Özeti
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#customerRentals">
+                    <i class="bi bi-calendar-check"></i> Kiralamalar
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#vehicleDetails">
+                    <i class="bi bi-truck"></i> Araç Detayları
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Aktif İlanlar VIEW -->
+            <div class="tab-pane fade show active" id="activeListings">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-eye"></i> VIEW: vw_active_listings</h5>
+                        <small class="text-muted">Aktif tüm ilanları araç ve galerici bilgileriyle gösterir</small>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tip</th>
+                                    <th>Araç</th>
+                                    <th>Plaka</th>
+                                    <th>Fiyat/Günlük</th>
+                                    <th>Galerici</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${activeListings}">
+                                    <td th:text="${item.listing_id}"></td>
+                                    <td>
+                                        <span th:if="${item.listing_type == 'SALE'}"
+                                            class="badge bg-success">Satılık</span>
+                                        <span th:if="${item.listing_type == 'RENTAL'}"
+                                            class="badge bg-info">Kiralık</span>
+                                    </td>
+                                    <td th:text="${item.brand + ' ' + item.model + ' (' + item.production_year + ')'}">
+                                    </td>
+                                    <td th:text="${item.plate_number}"></td>
+                                    <td>
+                                        <span th:if="${item.price != null}"
+                                            th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT') + ' ₺'}"></span>
+                                        <span th:if="${item.daily_rate != null}"
+                                            th:text="${#numbers.formatDecimal(item.daily_rate, 0, 'COMMA', 2, 'POINT') + ' ₺/gün'}"></span>
+                                    </td>
+                                    <td th:text="${item.dealer_name}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${#lists.isEmpty(activeListings)}" class="text-center text-muted">Aktif ilan
+                            bulunamadı.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Satış Özeti VIEW -->
+            <div class="tab-pane fade" id="salesSummary">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-eye"></i> VIEW: vw_sales_summary</h5>
+                        <small class="text-muted">Satış işlemlerinin özet bilgilerini gösterir</small>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tarih</th>
+                                    <th>Müşteri</th>
+                                    <th>Araç</th>
+                                    <th>Tutar</th>
+                                    <th>Durum</th>
+                                    <th>Galerici</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${salesSummary}">
+                                    <td th:text="${item.sale_id}"></td>
+                                    <td th:text="${item.sale_date}"></td>
+                                    <td th:text="${item.customer_name}"></td>
+                                    <td th:text="${item.vehicle_info}"></td>
+                                    <td
+                                        th:text="${item.amount != null ? #numbers.formatDecimal(item.amount, 0, 'COMMA', 2, 'POINT') + ' ₺' : '-'}">
+                                    </td>
+                                    <td>
+                                        <span th:if="${item.status == 'COMPLETED'}"
+                                            class="badge bg-success">Tamamlandı</span>
+                                        <span th:if="${item.status == 'PENDING'}"
+                                            class="badge bg-warning">Bekliyor</span>
+                                        <span th:if="${item.status == 'CANCELLED'}" class="badge bg-danger">İptal</span>
+                                    </td>
+                                    <td th:text="${item.dealer_name}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${#lists.isEmpty(salesSummary)}" class="text-center text-muted">Satış kaydı
+                            bulunamadı.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Müşteri Kiralamaları VIEW -->
+            <div class="tab-pane fade" id="customerRentals">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-eye"></i> VIEW: vw_customer_rentals</h5>
+                        <small class="text-muted">Tüm kiralama işlemlerini müşteri ve araç bilgileriyle gösterir</small>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Müşteri</th>
+                                    <th>Araç</th>
+                                    <th>Başlangıç</th>
+                                    <th>Bitiş</th>
+                                    <th>Gün</th>
+                                    <th>Toplam</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${customerRentals}">
+                                    <td th:text="${item.rental_id}"></td>
+                                    <td th:text="${item.customer_name}"></td>
+                                    <td th:text="${item.vehicle_info}"></td>
+                                    <td th:text="${item.start_date}"></td>
+                                    <td th:text="${item.end_date}"></td>
+                                    <td th:text="${item.rental_days}"></td>
+                                    <td
+                                        th:text="${item.total_cost != null ? #numbers.formatDecimal(item.total_cost, 0, 'COMMA', 2, 'POINT') + ' ₺' : '-'}">
+                                    </td>
+                                    <td>
+                                        <span th:if="${item.status == 'ACTIVE'}" class="badge bg-success">Aktif</span>
+                                        <span th:if="${item.status == 'COMPLETED'}"
+                                            class="badge bg-secondary">Tamamlandı</span>
+                                        <span th:if="${item.status == 'PENDING'}"
+                                            class="badge bg-warning">Bekliyor</span>
+                                        <span th:if="${item.status == 'CANCELLED'}" class="badge bg-danger">İptal</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${#lists.isEmpty(customerRentals)}" class="text-center text-muted">Kiralama kaydı
+                            bulunamadı.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Araç Detayları VIEW -->
+            <div class="tab-pane fade" id="vehicleDetails">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-eye"></i> VIEW: vw_vehicle_details</h5>
+                        <small class="text-muted">Araçların servis ve sigorta bilgileriyle birlikte detaylarını
+                            gösterir</small>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Marka/Model</th>
+                                    <th>Yıl</th>
+                                    <th>Plaka</th>
+                                    <th>Tip</th>
+                                    <th>KM</th>
+                                    <th>Servis</th>
+                                    <th>Sigorta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${vehicleDetails}">
+                                    <td th:text="${item.vehicle_id}"></td>
+                                    <td th:text="${item.brand + ' ' + item.model}"></td>
+                                    <td th:text="${item.production_year}"></td>
+                                    <td th:text="${item.plate_number}"></td>
+                                    <td>
+                                        <span th:if="${item.vehicle_type == 'ELECTRIC'}"
+                                            class="badge bg-success">Elektrik</span>
+                                        <span th:if="${item.vehicle_type == 'FUEL'}"
+                                            class="badge bg-warning">Yakıt</span>
+                                        <span th:if="${item.vehicle_type == 'HYBRID'}"
+                                            class="badge bg-info">Hibrit</span>
+                                    </td>
+                                    <td
+                                        th:text="${item.mileage != null ? #numbers.formatInteger(item.mileage, 0, 'COMMA') + ' km' : '-'}">
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary"
+                                            th:text="${item.total_services + ' servis'}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success" th:if="${item.active_insurances > 0}"
+                                            th:text="${item.active_insurances + ' aktif'}"></span>
+                                        <span class="badge bg-danger" th:if="${item.active_insurances == 0}">Yok</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${#lists.isEmpty(vehicleDetails)}" class="text-center text-muted">Araç bulunamadı.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
