@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "addresses")
+@Table(name = "personnel_addresses")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,8 +17,8 @@ public class Address {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    @JoinColumn(name = "personnel_id", nullable = false)
+    private Personnel personnel;
 
     private String city;
 

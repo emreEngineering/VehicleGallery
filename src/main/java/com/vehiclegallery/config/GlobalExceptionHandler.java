@@ -35,25 +35,35 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             Model model) {
         String message = "Veritabanı hatası oluştu.";
-
         String errorMessage = ex.getMessage();
+
+        // Log the full error for debugging
+        System.err.println("Database Error: " + errorMessage);
+        if (ex.getCause() != null) {
+            System.err.println("Cause: " + ex.getCause().getMessage());
+        }
+
         if (errorMessage != null) {
-            if (errorMessage.contains("email")) {
+            String lowerError = errorMessage.toLowerCase();
+            if (lowerError.contains("email")) {
                 message = "Bu e-posta adresi zaten kayıtlı!";
-            } else if (errorMessage.contains("national_id")) {
+            } else if (lowerError.contains("national_id")) {
                 message = "Bu TC Kimlik numarası zaten kayıtlı!";
-            } else if (errorMessage.contains("tax_number")) {
+            } else if (lowerError.contains("tax_number")) {
                 message = "Bu vergi numarası zaten kayıtlı!";
-            } else if (errorMessage.contains("plate_number")) {
+            } else if (lowerError.contains("plate_number") || lowerError.contains("plate_num")) {
                 message = "Bu plaka numarası zaten kayıtlı!";
-            } else if (errorMessage.contains("chassis_number")) {
+            } else if (lowerError.contains("chassis_number")) {
                 message = "Bu şasi numarası zaten kayıtlı!";
-            } else if (errorMessage.contains("foreign key") || errorMessage.contains("FOREIGN KEY")) {
-                message = "Bu kayıt başka kayıtlarla ilişkili olduğu için silinemez!";
+            } else if (lowerError.contains("foreign key") || lowerError.contains("foreign_key")) {
+                message = "İşlem başarısız: Veritabanı kısıtlaması hatası (Bağlı kayıtlar veya geçersiz referans).";
+            } else if (lowerError.contains("unique") || lowerError.contains("duplicate")) {
+                message = "Bu kayıt zaten mevcut (Tekrarlanan Veri).";
             }
         }
 
         model.addAttribute("error", message);
+        model.addAttribute("errorDetails", errorMessage); // Show details for now to help debug
         return "error/general";
     }
 
@@ -64,8 +74,9 @@ public class GlobalExceptionHandler {
     public String handleNullPointerException(NullPointerException ex,
             HttpServletRequest request,
             Model model) {
+        ex.printStackTrace(); // Log stack trace
         model.addAttribute("error", "Beklenmeyen bir hata oluştu. Lütfen tüm alanları doldurduğunuzdan emin olun.");
-        model.addAttribute("errorDetails", "Eksik veri hatası");
+        model.addAttribute("errorDetails", "Eksik veri hatası: " + ex.getMessage());
         return "error/general";
     }
 
@@ -98,6 +109,7 @@ public class GlobalExceptionHandler {
     public String handleGeneralException(Exception ex,
             HttpServletRequest request,
             Model model) {
+        ex.printStackTrace(); // Log full stack trace
         model.addAttribute("error", "Beklenmeyen bir hata oluştu.");
         model.addAttribute("errorDetails", ex.getClass().getSimpleName() + ": " + ex.getMessage());
         return "error/general";

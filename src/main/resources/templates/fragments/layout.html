@@ -31,17 +31,41 @@
 
         .sidebar {
             background: var(--sidebar-bg);
-            min-height: 100vh;
+            height: 100vh;
             padding: 0;
             position: fixed;
             width: 260px;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
         }
 
         .sidebar-brand {
             padding: 1.5rem;
             background: var(--primary-gradient);
             text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar .nav {
+            flex-grow: 1;
+            overflow-y: auto;
+            flex-wrap: nowrap;
+        }
+
+        /* Custom scrollbar for sidebar */
+        .sidebar .nav::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar .nav::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
         }
 
         .sidebar-brand h4 {
@@ -49,6 +73,7 @@
             font-weight: 700;
             letter-spacing: 1px;
         }
+
 
         .sidebar-brand small {
             opacity: 0.8;
@@ -257,18 +282,6 @@
 </head>
 
 <body>
-    <!-- Splash Screen -->
-    <div id="splashScreen" class="splash-screen">
-        <div class="splash-content">
-            <div class="splash-logo">
-                <i class="bi bi-car-front-fill"></i>
-            </div>
-            <div class="splash-text">Araç Galerisi</div>
-            <div class="splash-loader"></div>
-            <p class="text-muted mt-3">Yükleniyor...</p>
-        </div>
-    </div>
-
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-brand">
@@ -285,25 +298,30 @@
             <!-- Dealer Specific Links -->
             <a class="nav-link" th:if="${isDealer}" href="/my-listings"><i class="bi bi-collection-fill"></i>
                 İlanlarım</a>
-            <a class="nav-link" th:if="${isDealer}" href="/dealer-offers"><i class="bi bi-inbox-fill"></i> Gelen
-                Teklifler</a>
+            <a class="nav-link" th:if="${isDealer}" href="/sales"><i class="bi bi-inbox-fill"></i> Satış Talepleri</a>
 
             <!-- Customer Specific Links -->
-            <a class="nav-link" th:unless="${isDealer}" href="/my-offers"><i class="bi bi-tag-fill"></i> Tekliflerim</a>
+            <a class="nav-link" th:unless="${isDealer}" href="/sales"><i class="bi bi-bag-check-fill"></i>
+                Taleplerim</a>
 
             <!-- Common Links -->
             <a class="nav-link" href="/my-addresses"><i class="bi bi-geo-alt-fill"></i> Adreslerim</a>
             <a class="nav-link" href="/my-bank-accounts"><i class="bi bi-wallet2"></i> Banka Hesaplarım</a>
 
-            <a class="nav-link" href="/sales"><i class="bi bi-cash-stack"></i> Satışlar</a>
             <a class="nav-link" href="/rentals"><i class="bi bi-key"></i> Kiralamalar</a>
+
             <a class="nav-link" th:if="${isDealer}" href="/services"><i class="bi bi-wrench"></i> Servisler</a>
             <a class="nav-link" th:unless="${isDealer}" href="/notifications"><i class="bi bi-bell"></i> Bildirimler</a>
+
+            <div class="mt-4 mb-2 border-top border-secondary pt-2"></div>
+            <a class="nav-link text-danger fw-bold" href="/system/reset">
+                <i class="bi bi-trash3-fill"></i> VERİ SIFIRLAMA
+            </a>
         </nav>
 
         <!-- User Info -->
         <div class="sidebar-user mt-auto"
-            style="position: absolute; bottom: 0; width: 100%; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+            style="width: 100%; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); flex-shrink: 0;">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <small class="text-secondary d-block" th:if="${isDealer}">Galerici</small>
@@ -324,24 +342,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const splash = document.getElementById('splashScreen');
-
-            // Check if splash has been shown in this session
-            if (!sessionStorage.getItem('splashShown')) {
-                // First visit
-                setTimeout(() => {
-                    splash.style.opacity = '0';
-                    splash.style.visibility = 'hidden';
-                    sessionStorage.setItem('splashShown', 'true');
-                }, 2500); // 2.5 seconds delay
-            } else {
-                // Already shown, hide immediately
-                splash.style.display = 'none';
-            }
-        });
-    </script>
 </body>
 
 </html>

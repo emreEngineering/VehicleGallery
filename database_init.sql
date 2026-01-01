@@ -113,9 +113,9 @@ CREATE TABLE IF NOT EXISTS rentals (
 );
 
 -- 8. Addresses (Adresler)
-CREATE TABLE IF NOT EXISTS addresses (
+CREATE TABLE IF NOT EXISTS personnel_addresses (
     id BIGSERIAL PRIMARY KEY,
-    customer_id BIGINT NOT NULL REFERENCES personnel(id) ON DELETE CASCADE,
+    personnel_id BIGINT NOT NULL REFERENCES personnel(id) ON DELETE CASCADE,
     city VARCHAR(255),
     district VARCHAR(255),
     neighborhood VARCHAR(255),

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{fragments/layout :: layout(title='İlanlarım', content=~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-collection-fill"></i> İlanlarım</h2>
+            <div class="d-flex gap-2">
+                <a href="/listings/new" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Yeni İlan Ekle</a>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Araç</th>
+                        <th>Tip</th>
+                        <th>Fiyat / Oran</th>
+                        <th>Yayın Tarihi</th>
+                        <th>Durum</th>
+                        <th>Görüntülenme</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="listing : ${listings}">
+                        <td th:text="${listing.id}">-</td>
+                        <td th:text="${listing.vehicle?.brand + ' ' + listing.vehicle?.model}">-</td>
+                        <td>
+                            <span class="badge badge-sale" th:if="${listing.listingType == 'SALE'}">Satılık</span>
+                            <span class="badge badge-rental" th:if="${listing.listingType == 'RENTAL'}">Kiralık</span>
+                        </td>
+                        <td>
+                            <span th:if="${listing.listingType == 'SALE'}" th:text="${listing.price + ' ₺'}">-</span>
+                            <span th:if="${listing.listingType == 'RENTAL'}"
+                                th:text="${listing.dailyRate + ' ₺/gün'}">-</span>
+                        </td>
+                        <td th:text="${listing.publishDate}">-</td>
+                        <td>
+                            <span class="badge bg-success" th:if="${listing.isActive}">Yayında</span>
+                            <span class="badge bg-secondary" th:unless="${listing.isActive}">Pasif</span>
+                        </td>
+                        <td>
+                            <span class="text-muted"><i class="bi bi-eye"></i> -</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/listings/edit/{id}(id=${listing.id})}"
+                                class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                            <a th:href="@{/listings/delete/{id}(id=${listing.id})}"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Bu ilanı silmek istediğinize emin misiniz?')"><i
+                                    class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(listings)}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            <span>Henüz ilanınız bulunmuyor. <a href="/listings/new">Hemen bir ilan
+                                    oluşturun</a>.</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -47,10 +47,9 @@
                         </td>
                         <td>
                             <!-- Galerici Butonları -->
+                            <!-- Galerici Butonları -->
                             <div th:if="${isDealer}">
-                                <a th:href="@{/listings/delete/{id}(id=${listing.id})}"
-                                    class="btn btn-sm btn-outline-danger" onclick="return confirm('Emin misiniz?')"><i
-                                        class="bi bi-trash"></i></a>
+                                <!-- Silme butonu kaldırıldı -->
                             </div>
                             <!-- Müşteri Butonları -->
                             <div th:unless="${isDealer}">

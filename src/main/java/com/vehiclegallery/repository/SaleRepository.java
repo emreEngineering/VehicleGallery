@@ -12,6 +12,8 @@ import java.time.LocalDate;
 public interface SaleRepository extends JpaRepository<Sale, Long> {
     List<Sale> findByCustomerId(Long customerId);
 
+    List<Sale> findByListingDealerId(Long dealerId);
+
     List<Sale> findByStatus(String status);
 
     // =====================================================

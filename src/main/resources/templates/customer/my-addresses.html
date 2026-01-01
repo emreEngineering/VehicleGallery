@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout('Adreslerim', ~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-geo-alt-fill"></i> Adreslerim</h2>
+            <a href="/my-addresses/add" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Yeni Adres Ekle</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4" th:each="address : ${addresses}">
+                <div class="card h-100 bg-dark border-secondary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title text-light" th:text="${address.city + ' / ' + address.district}">Konum
+                            </h5>
+                            <i class="bi bi-map fs-3 text-secondary"></i>
+                        </div>
+
+                        <p class="text-secondary mb-3">
+                            <span class="d-block text-light" th:text="${address.neighborhood}">Mahalle</span>
+                            <span class="d-block" th:text="${address.street + ' ' + address.buildingNo}">Sokak No</span>
+                            <span class="d-block small" th:text="${address.postalCode}">PK</span>
+                        </p>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/my-addresses/edit/{id}(id=${address.id})}"
+                                class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i> Düzenle</a>
+                            <a th:href="@{/my-addresses/delete/{id}(id=${address.id})}"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Bu adresi silmek istediğinize emin misiniz?')"><i
+                                    class="bi bi-trash"></i> Sil</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="col-12" th:if="${#lists.isEmpty(addresses)}">
+                <div class="text-center py-5 text-secondary">
+                    <i class="bi bi-geo-alt display-1 mb-3"></i>
+                    <p class="fs-5">Henüz kayıtlı adresiniz bulunmuyor.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

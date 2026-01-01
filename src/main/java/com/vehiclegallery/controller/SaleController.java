@@ -32,15 +32,32 @@ public class SaleController {
 
     @GetMapping
     public String list(Model model, HttpSession session) {
-        model.addAttribute("sales", saleService.findAll());
+        com.vehiclegallery.entity.Personnel user = (com.vehiclegallery.entity.Personnel) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
 
-        // Galerici kontrolü
         String userType = (String) session.getAttribute("userType");
         boolean isDealer = "DEALER".equals(userType);
+
+        java.util.List<Sale> sales;
+        if (isDealer) {
+            sales = saleService.findByDealerId(user.getId());
+        } else if ("CUSTOMER".equals(userType)) {
+            sales = saleService.findByCustomerId(user.getId());
+        } else {
+            // Admin or others (fallback)
+            sales = saleService.findAll();
+        }
+
+        model.addAttribute("sales", sales);
         model.addAttribute("isDealer", isDealer);
 
-        // Bekleyen talep sayısı
-        long pendingCount = saleService.findByStatus("PENDING").size();
+        // Bekleyen talep sayısı (Only for the current user's scope ideally, but let's
+        // keep it simple for now)
+        // Actually, let's filter pending count by scope too if possible, or just size
+        // of filtered list
+        long pendingCount = sales.stream().filter(s -> "PENDING".equals(s.getStatus())).count();
         model.addAttribute("pendingCount", pendingCount);
 
         return "sales/list";
@@ -110,6 +127,7 @@ public class SaleController {
                     sale.setAmount(listing.getPrice());
                     sale.setDate(LocalDate.now());
                     sale.setStatus("PENDING");
+
                     saleService.save(sale);
 
                     redirectAttributes.addFlashAttribute("success", "Satın alma talebiniz oluşturuldu!");

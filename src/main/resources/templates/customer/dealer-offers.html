@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout('Gelen Teklifler', ~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-inbox-fill"></i> Gelen Teklifler</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="data-table">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>İlan / Araç</th>
+                                    <th>Müşteri</th>
+                                    <th>Teklif Tarihi</th>
+                                    <th>Teklif Tutarı</th>
+                                    <th>Durum</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="offer : ${offers}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-car-front text-secondary"></i>
+                                            <span
+                                                th:text="${offer.listing.vehicle.brand + ' ' + offer.listing.vehicle.model}">Araç</span>
+                                            <small class="text-muted"
+                                                th:text="'(' + ${offer.listing.id} + ')'">ID</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-person-circle text-secondary"></i>
+                                            <span
+                                                th:text="${offer.customer.firstName + ' ' + offer.customer.lastName}">Müşteri
+                                                Adı</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${offer.offerDate}">01.01.2024</td>
+                                    <td class="text-warning fw-bold"
+                                        th:text="${#numbers.formatCurrency(offer.offerAmount)}">₺0.00</td>
+                                    <td>
+                                        <span class="badge"
+                                            th:classappend="${offer.status == 'PENDING' ? 'bg-warning' : 
+                                                               (offer.status == 'ACCEPTED' ? 'bg-success' : 'bg-danger')}" th:text="${offer.status == 'PENDING' ? 'Beklemede' : 
+                                                        (offer.status == 'ACCEPTED' ? 'Kabul Edildi' : 'Reddedildi')}">
+                                            Durum
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div th:if="${offer.status == 'PENDING'}" class="btn-group">
+                                            <a th:href="@{/offers/accept/{id}(id=${offer.id})}"
+                                                class="btn btn-sm btn-success" title="Kabul Et">
+                                                <i class="bi bi-check-lg"></i>
+                                            </a>
+                                            <a th:href="@{/offers/reject/{id}(id=${offer.id})}"
+                                                class="btn btn-sm btn-danger" title="Reddet">
+                                                <i class="bi bi-x-lg"></i>
+                                            </a>
+                                        </div>
+                                        <a th:href="@{/listings/{id}(id=${offer.listing.id})}"
+                                            class="btn btn-sm btn-outline-info" title="İlanı Gör">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(offers)}">
+                                    <td colspan="6" class="text-center text-secondary py-4">
+                                        <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                        <span>Henüz gelen bir teklif bulunmuyor.</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

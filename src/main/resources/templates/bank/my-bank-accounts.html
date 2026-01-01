@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout('Banka Hesaplarım', ~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-wallet2"></i> Banka Hesaplarım</h2>
+            <a href="/my-bank-accounts/add" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Yeni Hesap Ekle</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4" th:each="account : ${bankAccounts}">
+                <div class="card h-100 bg-dark border-secondary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title text-light mb-1" th:text="${account.bankName}">Banka Adı</h5>
+                                <small class="text-secondary">IBAN / Hesap No</small>
+                            </div>
+                            <i class="bi bi-credit-card-2-front fs-3 text-secondary"></i>
+                        </div>
+
+                        <p class="h4 text-warning mb-3" th:text="${account.accountNumber}">TR00 0000 0000 0000 0000 0000
+                            00</p>
+
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <small class="text-secondary d-block">Bakiye</small>
+                                <span class="h5 text-light mb-0"
+                                    th:text="${#numbers.formatCurrency(account.balance)}">₺0.00</span>
+                            </div>
+                            <div class="btn-group">
+                                <a th:href="@{/my-bank-accounts/edit/{id}(id=${account.id})}"
+                                    class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                                <a th:href="@{/my-bank-accounts/delete/{id}(id=${account.id})}"
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Bu hesabı silmek istediğinize emin misiniz?')"><i
+                                        class="bi bi-trash"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="col-12" th:if="${#lists.isEmpty(bankAccounts)}">
+                <div class="text-center py-5 text-secondary">
+                    <i class="bi bi-wallet2 display-1 mb-3"></i>
+                    <p class="fs-5">Henüz kayıtlı banka hesabınız bulunmuyor.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
