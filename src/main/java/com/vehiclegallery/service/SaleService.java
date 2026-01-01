@@ -71,7 +71,7 @@ public class SaleService {
 
     public double getTotalRevenue() {
         return saleRepository.findAll().stream()
-                .mapToDouble(s -> s.getAmount() != null ? s.getAmount() : 0)
+                .mapToDouble(s -> s.getAmount() != null ? s.getAmount() : 0.0)
                 .sum();
     }
 }
