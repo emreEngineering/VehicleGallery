@@ -5,11 +5,15 @@
 <body>
     <div th:fragment="content">
         <div class="mb-4">
-            <h2><i class="bi bi-megaphone"></i> Add Listing</h2>
+            <h2 th:if="${listing.id == null}"><i class="bi bi-megaphone"></i> Add Listing</h2>
+            <h2 th:if="${listing.id != null}"><i class="bi bi-pencil-square"></i> Edit Listing</h2>
         </div>
 
         <div class="form-card">
             <form th:action="@{/listings}" th:object="${listing}" method="post">
+                <input type="hidden" th:field="*{id}" />
+                <input type="hidden" th:field="*{publishDate}" />
+                <input type="hidden" th:field="*{isActive}" />
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Vehicle *</label>
@@ -21,7 +25,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Listing Type *</label>
-                        <select class="form-select" th:field="*{listingType}" required>
+                        <select class="form-select" th:field="*{listingType}" id="listingType" required>
                             <option value="">Select Type</option>
                             <option value="SALE">For Sale</option>
                             <option value="RENTAL">For Rent</option>
@@ -32,46 +36,85 @@
                         <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
                     </div>
 
-                    <div class="col-12">
-                        <hr class="my-3" style="border-color: rgba(255,255,255,0.1)">
-                        <h5>Sale Details</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Price ($)</label>
-                        <input type="number" step="0.01" class="form-control" th:field="*{price}">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Trade-In Available</label>
-                        <select class="form-select" th:field="*{tradeIn}">
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                        </select>
+                    <div id="saleDetails"
+                        th:style="${listing.listingType == 'SALE' ? 'display: block;' : 'display: none;'}">
+                        <div class="col-12">
+                            <hr class="my-3" style="border-color: rgba(255,255,255,0.1)">
+                            <h5>Sale Details</h5>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Price ($)</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{price}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Trade-In Available</label>
+                                <select class="form-select" th:field="*{tradeIn}">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="col-12">
-                        <hr class="my-3" style="border-color: rgba(255,255,255,0.1)">
-                        <h5>Rental Details</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Daily Rate ($)</label>
-                        <input type="number" step="0.01" class="form-control" th:field="*{dailyRate}">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Min Days</label>
-                        <input type="number" class="form-control" th:field="*{minDays}">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Max Days</label>
-                        <input type="number" class="form-control" th:field="*{maxDays}">
+                    <div id="rentalDetails"
+                        th:style="${listing.listingType == 'RENTAL' ? 'display: block;' : 'display: none;'}">
+                        <div class="col-12">
+                            <hr class="my-3" style="border-color: rgba(255,255,255,0.1)">
+                            <h5>Rental Details</h5>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Daily Rate ($)</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{dailyRate}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Min Days</label>
+                                <input type="number" class="form-control" th:field="*{minDays}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Max Days</label>
+                                <input type="number" class="form-control" th:field="*{maxDays}">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg"></i> Create Listing</button>
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg"></i> Save Listing</button>
                     <a href="/listings" class="btn btn-secondary ms-2">Cancel</a>
                 </div>
             </form>
         </div>
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const listingTypeSelect = document.getElementById('listingType');
+                const saleDetails = document.getElementById('saleDetails');
+                const rentalDetails = document.getElementById('rentalDetails');
+
+                // Helper function to show/hide elements
+                function toggleDetails() {
+                    const type = listingTypeSelect.value;
+                    console.log("Listing Type:", type);
+
+                    if (type === 'SALE') {
+                        saleDetails.style.display = 'block';
+                        rentalDetails.style.display = 'none';
+                    } else if (type === 'RENTAL') {
+                        saleDetails.style.display = 'none';
+                        rentalDetails.style.display = 'block';
+                    } else {
+                        saleDetails.style.display = 'none';
+                        rentalDetails.style.display = 'none';
+                    }
+                }
+
+                // Listen for changes
+                listingTypeSelect.addEventListener('change', toggleDetails);
+            });
+        </script>
     </div>
 </body>
 

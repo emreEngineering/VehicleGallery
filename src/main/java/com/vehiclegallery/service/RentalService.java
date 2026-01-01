@@ -4,6 +4,7 @@ import com.vehiclegallery.entity.Rental;
 import com.vehiclegallery.repository.RentalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +36,20 @@ public class RentalService {
 
     public long count() {
         return rentalRepository.count();
+    }
+
+    /**
+     * Belirtilen araç ve tarih aralığında çakışan kiralama var mı kontrol eder
+     */
+    public boolean hasConflictingRentals(Long vehicleId, LocalDate startDate, LocalDate endDate) {
+        List<Rental> conflicts = rentalRepository.findConflictingRentals(vehicleId, startDate, endDate);
+        return !conflicts.isEmpty();
+    }
+
+    /**
+     * Belirli bir araç için aktif kiralamalar
+     */
+    public List<Rental> findActiveByVehicleId(Long vehicleId) {
+        return rentalRepository.findActiveByVehicleId(vehicleId);
     }
 }

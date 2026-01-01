@@ -29,4 +29,7 @@ public class Personnel {
     private String email;
 
     private String password;
+
+    @OneToMany(mappedBy = "personnel", cascade = CascadeType.ALL)
+    private java.util.List<Address> addresses;
 }

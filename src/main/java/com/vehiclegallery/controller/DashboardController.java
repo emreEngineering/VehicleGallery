@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class DashboardController {
@@ -25,7 +26,7 @@ public class DashboardController {
     private RentalService rentalService;
 
     @GetMapping("/")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpSession session) {
         model.addAttribute("vehicleCount", vehicleService.count());
         model.addAttribute("customerCount", customerService.count());
         model.addAttribute("listingCount", listingService.count());
@@ -38,6 +39,12 @@ public class DashboardController {
         model.addAttribute("recentVehicles", vehicleService.findAll().stream().limit(5).toList());
         model.addAttribute("recentListings", listingService.findActiveListings().stream().limit(5).toList());
 
+        // Kullanıcı tipi kontrolü - Müşteriler için menü filtreleme
+        String userType = (String) session.getAttribute("userType");
+        model.addAttribute("isDealer", "DEALER".equals(userType));
+        model.addAttribute("currentUser", session.getAttribute("user"));
+
         return "index";
     }
+
 }

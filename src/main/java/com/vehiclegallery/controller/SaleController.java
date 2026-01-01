@@ -4,6 +4,7 @@ import com.vehiclegallery.entity.Sale;
 import com.vehiclegallery.service.SaleService;
 import com.vehiclegallery.service.CustomerService;
 import com.vehiclegallery.service.ListingService;
+import com.vehiclegallery.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vehiclegallery.entity.Customer;
 import org.springframework.stereotype.Controller;
@@ -26,9 +27,39 @@ public class SaleController {
     @Autowired
     private ListingService listingService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("sales", saleService.findAll());
+    public String list(Model model, HttpSession session) {
+        com.vehiclegallery.entity.Personnel user = (com.vehiclegallery.entity.Personnel) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        String userType = (String) session.getAttribute("userType");
+        boolean isDealer = "DEALER".equals(userType);
+
+        java.util.List<Sale> sales;
+        if (isDealer) {
+            sales = saleService.findByDealerId(user.getId());
+        } else if ("CUSTOMER".equals(userType)) {
+            sales = saleService.findByCustomerId(user.getId());
+        } else {
+            // Admin or others (fallback)
+            sales = saleService.findAll();
+        }
+
+        model.addAttribute("sales", sales);
+        model.addAttribute("isDealer", isDealer);
+
+        // Bekleyen talep sayısı (Only for the current user's scope ideally, but let's
+        // keep it simple for now)
+        // Actually, let's filter pending count by scope too if possible, or just size
+        // of filtered list
+        long pendingCount = sales.stream().filter(s -> "PENDING".equals(s.getStatus())).count();
+        model.addAttribute("pendingCount", pendingCount);
+
         return "sales/list";
     }
 
@@ -96,11 +127,8 @@ public class SaleController {
                     sale.setAmount(listing.getPrice());
                     sale.setDate(LocalDate.now());
                     sale.setStatus("PENDING");
-                    saleService.save(sale);
 
-                    // İlanı pasif yap
-                    listing.setIsActive(false);
-                    listingService.save(listing);
+                    saleService.save(sale);
 
                     redirectAttributes.addFlashAttribute("success", "Satın alma talebiniz oluşturuldu!");
                     return "redirect:/sales";
@@ -143,5 +171,63 @@ public class SaleController {
         saleService.deleteById(id);
         redirectAttributes.addFlashAttribute("success", "Satış başarıyla silindi!");
         return "redirect:/sales";
+    }
+
+    // Galerici: Satış talebini onayla
+    @GetMapping("/{id}/approve")
+    public String approve(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        String userType = (String) session.getAttribute("userType");
+        if (!"DEALER".equals(userType)) {
+            return "redirect:/login";
+        }
+
+        return saleService.findById(id)
+                .map(sale -> {
+                    sale.setStatus("COMPLETED");
+                    saleService.save(sale);
+
+                    // İlanı pasif yap
+                    if (sale.getListing() != null) {
+                        sale.getListing().setIsActive(false);
+                        listingService.save(sale.getListing());
+                    }
+
+                    // Müşteriye bildirim gönder
+                    if (sale.getCustomer() != null && sale.getListing() != null) {
+                        String vehicleInfo = sale.getListing().getVehicle().getBrand() + " " +
+                                sale.getListing().getVehicle().getModel();
+                        notificationService.sendSaleApprovedNotification(sale.getCustomer(), sale.getId(), vehicleInfo);
+                    }
+
+                    redirectAttributes.addFlashAttribute("success", "Satış onaylandı!");
+                    return "redirect:/sales";
+                })
+                .orElse("redirect:/sales");
+    }
+
+    // Galerici: Satış talebini reddet
+    @GetMapping("/{id}/reject")
+    public String reject(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        String userType = (String) session.getAttribute("userType");
+        if (!"DEALER".equals(userType)) {
+            return "redirect:/login";
+        }
+
+        return saleService.findById(id)
+                .map(sale -> {
+                    sale.setStatus("CANCELLED");
+                    saleService.save(sale);
+
+                    // Müşteriye bildirim gönder
+                    if (sale.getCustomer() != null && sale.getListing() != null) {
+                        String vehicleInfo = sale.getListing().getVehicle().getBrand() + " " +
+                                sale.getListing().getVehicle().getModel();
+                        notificationService.sendSaleRejectedNotification(sale.getCustomer(), sale.getId(), vehicleInfo);
+                    }
+
+                    redirectAttributes.addFlashAttribute("success", "Satış reddedildi!");
+                    return "redirect:/sales";
+                })
+                .orElse("redirect:/sales");
     }
 }

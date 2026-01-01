@@ -48,4 +48,8 @@ public class ListingService {
     public List<Listing> findByType(String type) {
         return listingRepository.findByListingType(type);
     }
+
+    public List<Listing> findByDealerId(Long dealerId) {
+        return listingRepository.findByDealerId(dealerId);
+    }
 }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout('Yeni Adres Ekle', ~{::content})}">
+
+<body>
+    <div th:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-card">
+                    <h3 class="mb-4"><i class="bi bi-geo-alt-fill"></i> Yeni Adres Ekle</h3>
+
+                    <form th:action="@{/my-addresses/add}" method="post" th:object="${address}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">İl</label>
+                                <input type="text" class="form-control" th:field="*{city}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">İlçe</label>
+                                <input type="text" class="form-control" th:field="*{district}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Mahalle</label>
+                                <input type="text" class="form-control" th:field="*{neighborhood}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Posta Kodu</label>
+                                <input type="text" class="form-control" th:field="*{postalCode}" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Sokak / Cadde</label>
+                                <input type="text" class="form-control" th:field="*{street}" required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Bina / Daire No</label>
+                                <input type="text" class="form-control" th:field="*{buildingNo}" required>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-accent w-100">Kaydet</button>
+                                <a href="/my-addresses" class="btn btn-outline-secondary w-100 mt-2">İptal</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
