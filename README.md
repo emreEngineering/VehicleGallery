@@ -6,7 +6,6 @@
 ![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen?logo=springboot)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue?logo=postgresql)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
