@@ -278,7 +278,7 @@ VehicleGallery/
 
 ## 📄 Lisans
 
-Bu proje eğitim amaçlı geliştirilmiştir ve MIT lisansı altında sunulmaktadır.
+Bu proje eğitim amaçlı geliştirilmiştir.
 
 ---
 
