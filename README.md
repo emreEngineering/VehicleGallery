@@ -28,7 +28,7 @@ Bu proje, **Veritabanı Yönetim Sistemleri** dersi kapsamında geliştirilmiş 
 ![Satış İşlemleri](screenshots/img_2.png)
 
 ### Video
-![Genel](screenshots/proje_video.gif)
+<img src="screenshots/proje_video.gif" alt="Proje Video" width="100%">
 ---
 
 ## 🎯 Proje Amaçları
