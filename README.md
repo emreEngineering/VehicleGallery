@@ -45,20 +45,20 @@ Bu proje, **Veritabanı Yönetim Sistemleri** dersi kapsamında geliştirilmiş 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Presentation Layer                      │
-│                    (Thymeleaf Templates)                     │
+│                      Presentation Layer                     │
+│                    (Thymeleaf Templates)                    │
 ├─────────────────────────────────────────────────────────────┤
-│                      Controller Layer                        │
-│  VehicleController, CustomerController, SaleController ...   │
+│                      Controller Layer                       │
+│  VehicleController, CustomerController, SaleController ...  │
 ├─────────────────────────────────────────────────────────────┤
-│                       Service Layer                          │
-│  VehicleService, CustomerService, SaleService, ...           │
+│                       Service Layer                         │
+│  VehicleService, CustomerService, SaleService, ...          │
 ├─────────────────────────────────────────────────────────────┤
-│                      Repository Layer                        │
-│      Spring Data JPA Repositories (CRUD Operations)          │
+│                      Repository Layer                       │
+│      Spring Data JPA Repositories (CRUD Operations)         │
 ├─────────────────────────────────────────────────────────────┤
-│                      Database Layer                          │
-│                       PostgreSQL 15+                         │
+│                      Database Layer                         │
+│                       PostgreSQL 15+                        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
